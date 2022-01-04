@@ -29,7 +29,8 @@
 */
 //===========================================================
 //===========================================================
-#include	"SYSCFG.h";
+#include	"SYSCFG.h"
+#include 	"public.h"
 //===========================================================
 //Variable definition
 //===========================================================
@@ -37,7 +38,7 @@
 #define 	unchar     	unsigned char 
 #define 	unint         unsigned int
 #define  	unlong 		unsigned long
-#define  DemoPortOut	PB2   
+//#define  DemoPortOut	PB2   
 //#define  DemoPortIn		PA6
 /*-------------------------------------------------
  *  函数名：POWER_INITIAL
@@ -83,7 +84,7 @@ void POWER_INITIAL (void)
 	//BIT0:0：睡眠时停止工作：1： 睡眠时保持工作。当T2时钟不是选择指令时钟的时候
     
 	}
-    
+  
 /*----------------------------------------------------
  *	函数名称：DelayUs
  *	功能：   短延时函数 --16M-2T--大概快1%左右.
@@ -139,6 +140,16 @@ void DelayS(unsigned char Time)
 //===========================================================
 void interrupt ISR(void)
 {
+		  //定时器0的中断处理**********************
+		if(T0IE && T0IF)                //8.192ms翻转一次≈60Hz
+		{
+			TMR0 = TIMER0_RELOAD_VALUE;               //注意:对TMR0重新赋值TMR0在两个周期内不变化
+
+			T0IF = 0;
+			//UART_TX = ~UART_TX; //翻转电平
+            
+			TM0_FLAG=1;//清传输标志
+		}
 }
 /*-------------------------------------------------
  *  函数名: main 
@@ -149,18 +160,19 @@ void interrupt ISR(void)
 void main(void)
 {
 	POWER_INITIAL();			//系统初始化
-  
+	TIMER0_INITIAL();
+    
+	GIE  = 1; 				//开中断
+	//T0IE = 0;				//开定时器/计数器0中断
     //===========================================================
 
     //===============================================================	
 	while(1)
 	{
-		DemoPortOut = 0; 		
-		DelayMs(10);     		//10ms
+		DelayMs(100);
+		send_a_byte(0xA5);
         
-		DemoPortOut = 1;
-
-		DelayMs(10); 
+		//	NOP();
 	}
 }
 //===========================================================
