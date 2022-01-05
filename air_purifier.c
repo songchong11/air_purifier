@@ -57,8 +57,9 @@ void POWER_INITIAL (void)
 	TRISA  = 0B11111110;	//PA输入输出 0-输出 1-输入
 							//PA0 设置为输出
 	PORTB  = 0B00000000; 	
-	TRISB  = 0B01111011;	//PB输入输出 0-输出 1-输入  
+	TRISB  = 0B01110011;	//PB输入输出 0-输出 1-输入  
 											//PB2配置为输出
+                                            //PB3配置为输出
 	PORTC  = 0B00000000; 	
 	TRISC  = 0B11111111;	//PC输入输出 0-输出 1-输入  
 								
@@ -148,24 +149,27 @@ void interrupt ISR(void)
 				T0IF = 0;
 				
 				TM0_FLAG=1;//清传输标志
-				
+				PB2 = ~PB2; //debug
+  
 				/*****Receive byte******/
 				recvStat++; //改变状态机
 				if(recvStat == COM_STOP_BIT) //收到停止位
 				{
-					 T0IE = 0; //关闭定时器
+					 T0IE = 0; 			//关闭定时器
                      PAIE = 1;  			//开启PA中断
                      IOCA1 =1;  			//开启PA1电平变化中断
-                   //  printf("r %1x\n", recvData);
+					 PB3 = 1;
 					return; //并返回
 				}
 				if(UART_RX) //'1'
 				{
 					recvData |= (1 << (recvStat - 1));
+                    PB3 = 1;
 				}
 				else //'0'
 				{
 					recvData &= ~(1 <<(recvStat - 1));
+                    PB3 = 0;
 				}
 				
 		}
@@ -176,6 +180,7 @@ void interrupt ISR(void)
 				ReadAPin = PORTA; 	//读取PORTA数据清PAIF标志
 				PAIE = 0;  			//暂先禁止PA中断
 				
+				#if 1
 				if (!(PORTA  & BIT(1))) 
                 {
  
@@ -188,10 +193,12 @@ void interrupt ISR(void)
 								recvStat = COM_START_BIT; //接收到开始位
 								DelayUs(3); //延时一定时间
 								T0IE = 1; //打开定时器，接收数据
+                                 PB3 = 0; //debug
 							}
 							PAIF = 0;  			//清PAIF标志位
 						}      
 				}
+                #endif
 		}
 }
 /*-------------------------------------------------
@@ -209,6 +216,9 @@ void main(void)
 	printf("air purifier progect init\r\n");
 	GIE  = 1; 				//开中断
 	//T0IE = 0;				//开定时器/计数器0中断
+    
+    PB3 = 1; //debug
+    PB2 = 1; //debug
     //===========================================================
 
     //===============================================================	
@@ -216,7 +226,7 @@ void main(void)
 	{
 		//DelayMs(1000);
 		//send_a_byte(0xA5);
-        if (recvData != 0) {
+        if (recvData != 0 && recvStat == COM_STOP_BIT) {
             	printf("loop %1x\r\n", recvData);
                 recvData = 0;
 		}

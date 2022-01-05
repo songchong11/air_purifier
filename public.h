@@ -15,7 +15,7 @@
 #if PRINTF_DEBUG
 #include "printf.h"
 											//baud rat is 115200
-#define 	PRINTF_IO	PB7  //PB2 used for IO UART TX
+#define 	PRINTF_IO	PB7  //PB7 used printf IO
 #endif
 
 
