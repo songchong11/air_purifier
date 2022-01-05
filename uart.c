@@ -114,6 +114,7 @@ void send_a_byte(unchar input)
 		T0IE = 0;//关闭timer0
 }
 
+#if 0
 /*-------------------------------------------------
  *  函数名: read_a_byte 
  *	功能：  接收一个字符
@@ -146,7 +147,7 @@ uchar read_a_byte()
 
 	return Output;
 }
-
+#endif
 
 
 

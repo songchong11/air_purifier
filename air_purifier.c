@@ -57,7 +57,7 @@ void POWER_INITIAL (void)
 	TRISA  = 0B11111111;	//PA输入输出 0-输出 1-输入
 							//
 	PORTB  = 0B00000000; 	
-	TRISB  = 0B11111011;	//PB输入输出 0-输出 1-输入  
+	TRISB  = 0B01111011;	//PB输入输出 0-输出 1-输入  
 											//PB2配置为输出
 	PORTC  = 0B00000000; 	
 	TRISC  = 0B11111111;	//PC输入输出 0-输出 1-输入  
@@ -161,7 +161,8 @@ void main(void)
 {
 	POWER_INITIAL();			//系统初始化
 	TIMER0_INITIAL();
-    
+
+	printf("air purifier progect init\r\n");
 	GIE  = 1; 				//开中断
 	//T0IE = 0;				//开定时器/计数器0中断
     //===========================================================
@@ -171,7 +172,7 @@ void main(void)
 	{
 		DelayMs(100);
 		send_a_byte(0xA5);
-        
+        printf("loop\r\n");
 		//	NOP();
 	}
 }
