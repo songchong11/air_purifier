@@ -41,7 +41,10 @@
 #define  	unlong 		unsigned long
 
 unsigned char  TM0_FLAG  = 0;
-#define ENABLE_TIM0	
+
+unchar ReadAPin;
+unchar recvData;
+unchar recvStat = COM_STOP_BIT; //定义接收状态机
 /*----------------------------------------------------
  *	函数名称：TIMER0_INITIAL
  *	功能：初始化设置定时器
@@ -114,6 +117,24 @@ void send_a_byte(unchar input)
 		T0IE = 0;//关闭timer0
 }
 
+
+/*-------------------------------------------------
+ *  函数名: PA1_Level_Change_INITIAL
+ *	功能：  PA端口(PA1)电平变化中断初始化
+ *  输入：  无
+ *  输出：  无
+--------------------------------------------------*/
+void PA1_Level_Change_INITIAL(void)
+{
+ 
+	TRISA1 =1; 			     //SET PA1 INPUT
+	ReadAPin = PORTA;	     //清PA电平变化中断
+	PAIF =0;   			     //清PA INT中断标志位
+    IOCA1 =1;  			     //使能PA1电平变化中断
+	PAIE =1;   			     //使能PA INT中断
+    //GIE =1;    			     //使能全局中断
+}
+
 #if 0
 /*-------------------------------------------------
  *  函数名: read_a_byte 
@@ -121,7 +142,7 @@ void send_a_byte(unchar input)
  *  输入：  无
  *  输出：  无
  --------------------------------------------------*/
-uchar read_a_byte()
+unchar read_a_byte()
 {
     unchar Output = 0;
     unchar i = 8;
@@ -134,13 +155,13 @@ uchar read_a_byte()
     while(i--)
     {
         Output >>= 1;
-        if(RXD) Output |= 0x80;    //先收低位
+        if(UART_RX) Output |= 0x80;    //先收低位
         WaitTF0();                 		 //位间延时
     }
  
 	while(!TM0_FLAG)
 	{
-		if(RXD) break;
+		if(UART_RX) break;
 	}
 
 	T0IE = 0;                        //停止

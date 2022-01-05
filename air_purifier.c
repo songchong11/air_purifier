@@ -54,16 +54,16 @@ void POWER_INITIAL (void)
 
 	INTCON = 0;  			//暂禁止所有中断
 	PORTA  = 0B00000000;		
-	TRISA  = 0B11111111;	//PA输入输出 0-输出 1-输入
-							//
+	TRISA  = 0B11111110;	//PA输入输出 0-输出 1-输入
+							//PA0 设置为输出
 	PORTB  = 0B00000000; 	
 	TRISB  = 0B01111011;	//PB输入输出 0-输出 1-输入  
 											//PB2配置为输出
 	PORTC  = 0B00000000; 	
 	TRISC  = 0B11111111;	//PC输入输出 0-输出 1-输入  
 								
-	WPUA   = 0B01000000;    //PA端口上拉控制 1-开上拉 0-关上拉
-							//开PA6上拉
+	WPUA   = 0B00000010;    //PA端口上拉控制 1-开上拉 0-关上拉
+							//开PA1上拉
 	WPUC   = 0B00000000;    //PC端口上拉控制 1-开上拉 0-关上拉
 							//60系列PC口无上拉	
                             
@@ -143,12 +143,55 @@ void interrupt ISR(void)
 		  //定时器0的中断处理**********************
 		if(T0IE && T0IF)                //8.192ms翻转一次≈60Hz
 		{
-			TMR0 = TIMER0_RELOAD_VALUE;               //注意:对TMR0重新赋值TMR0在两个周期内不变化
+				TMR0 = TIMER0_RELOAD_VALUE;               //注意:对TMR0重新赋值TMR0在两个周期内不变化
 
-			T0IF = 0;
-			//UART_TX = ~UART_TX; //翻转电平
-            
-			TM0_FLAG=1;//清传输标志
+				T0IF = 0;
+				
+				TM0_FLAG=1;//清传输标志
+				
+				/*****Receive byte******/
+				recvStat++; //改变状态机
+				if(recvStat == COM_STOP_BIT) //收到停止位
+				{
+					 T0IE = 0; //关闭定时器
+                     PAIE = 1;  			//开启PA中断
+                     IOCA1 =1;  			//开启PA1电平变化中断
+                   //  printf("r %1x\n", recvData);
+					return; //并返回
+				}
+				if(UART_RX) //'1'
+				{
+					recvData |= (1 << (recvStat - 1));
+				}
+				else //'0'
+				{
+					recvData &= ~(1 <<(recvStat - 1));
+				}
+				
+		}
+        
+	  //PA电平变化中断**********************
+		 if(PAIE && PAIF)
+		{
+				ReadAPin = PORTA; 	//读取PORTA数据清PAIF标志
+				PAIE = 0;  			//暂先禁止PA中断
+				
+				if (!(PORTA  & BIT(1))) 
+                {
+ 
+              			IOCA1 =0;  			//禁止PA1电平变化中断
+
+						if(!UART_RX) //检测引脚高低电平，如果是低电平，则说明检测到下升沿
+						{
+							if(recvStat == COM_STOP_BIT) //状态为停止位
+							{
+								recvStat = COM_START_BIT; //接收到开始位
+								DelayUs(3); //延时一定时间
+								T0IE = 1; //打开定时器，接收数据
+							}
+							PAIF = 0;  			//清PAIF标志位
+						}      
+				}
 		}
 }
 /*-------------------------------------------------
@@ -161,6 +204,7 @@ void main(void)
 {
 	POWER_INITIAL();			//系统初始化
 	TIMER0_INITIAL();
+	PA1_Level_Change_INITIAL();
 
 	printf("air purifier progect init\r\n");
 	GIE  = 1; 				//开中断
@@ -170,10 +214,14 @@ void main(void)
     //===============================================================	
 	while(1)
 	{
-		DelayMs(100);
-		send_a_byte(0xA5);
-        printf("loop\r\n");
-		//	NOP();
+		//DelayMs(1000);
+		//send_a_byte(0xA5);
+        if (recvData != 0) {
+            	printf("loop %1x\r\n", recvData);
+                recvData = 0;
+		}
+
+  
 	}
 }
 //===========================================================

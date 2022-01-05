@@ -20,11 +20,38 @@
 
 
 #define 	UART_TX		PB2  //PB2 used for IO UART TX
+#define 	UART_RX		PA1  //PA1 used for IO UART RX
 
+enum{
+	COM_START_BIT, //ֹͣλ
+	COM_D0_BIT, //bit0
+	COM_D1_BIT, //bit1
+	COM_D2_BIT, //bit2
+	COM_D3_BIT, //bit3
+	COM_D4_BIT, //bit4
+	COM_D5_BIT, //bit5
+	COM_D6_BIT, //bit6
+	COM_D7_BIT, //bit7
+	COM_STOP_BIT, //bit8
+};
+
+extern unchar ReadAPin;
+extern unchar recvStat;
+extern unchar recvData;
+extern void PA1_Level_Change_INITIAL(void);
 extern  unsigned char  TM0_FLAG ;
 extern void DelayUs(unsigned char Time);
-
-
 extern void send_a_byte(unchar input);
+
+
+
+#define BIT(n)                  		( 1<<(n) )
+#define BIT_SET(x, n)         	((x) |=  BIT(n))
+#define BIT_CLR(x, n)       	((x) &= ~ BIT(n))
+#define BIT_IS_SET(x, n)   		((x) & BIT(n))
+#define BIT_FLIP(x, n)   		((x) ^= BIT(n))
+#define BIT_SET_HIGH(x) 		((x) |=  BIT((sizeof((x))*8-1)))				// set the highest bit
+#define BIT_CLR_HIGH(x) 		((x) &= ~ BIT((sizeof((x))*8-1)))				// clr the highest bit
+#define BIT_IS_SET_HIGH(x) 		((x) & BIT((sizeof((x))*8-1)))				// check the higest bit
 
 #endif
