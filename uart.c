@@ -43,7 +43,7 @@
 unsigned char  TM0_FLAG  = 0;
 
 unchar ReadAPin;
-unchar recvData;
+
 unchar recvStat = COM_STOP_BIT; //定义接收状态机
 /*----------------------------------------------------
  *	函数名称：TIMER0_INITIAL

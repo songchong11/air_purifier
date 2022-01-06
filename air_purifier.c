@@ -38,8 +38,10 @@
 #define 	unchar     	unsigned char 
 #define 	unint         unsigned int
 #define  	unlong 		unsigned long
-//#define  DemoPortOut	PB2   
-//#define  DemoPortIn		PA6
+
+unchar recvData;
+unchar rx_buff[20] = {0};
+unchar rx_cnt = 0;
 /*-------------------------------------------------
  *  函数名：POWER_INITIAL
  *	功能：  上电系统初始化
@@ -220,7 +222,7 @@ void main(void)
 	TIMER0_INITIAL();
 	PA1_Level_Change_INITIAL();
 
-	printf("air purifier progect init\r\n");
+//	printf("air purifier progect init\r\n");
 	GIE  = 1; 				//开中断
 	//T0IE = 0;				//开定时器/计数器0中断
     
@@ -234,9 +236,14 @@ void main(void)
 		//DelayMs(1000);
 		//send_a_byte(0xA5);
         if (recvData != 0 && recvStat == COM_STOP_BIT) {
-            	printf("loop %1x\r\n", recvData);
+                rx_buff[rx_cnt++] = recvData;
                 recvData = 0;
+                if (rx_cnt == 6 && rx_buff[0] == 0xaa && rx_buff[5] == 0xf6) {
+                   // printf("loop %1x %1x %1x\r\n", 0xaa, 0xbb, 0xcc);
+                    rx_cnt = 0;
+				}
 		}
+        
 
   
 	}
