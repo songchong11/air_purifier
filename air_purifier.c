@@ -156,11 +156,14 @@ void interrupt ISR(void)
 				if(recvStat == COM_STOP_BIT) //收到停止位
 				{
 					 T0IE = 0; 			//关闭定时器
+					 T0IF = 0;
+  
                      PAIE = 1;  			//开启PA中断
                      IOCA1 =1;  			//开启PA1电平变化中断
 					 PB3 = 1;
 					return; //并返回
 				}
+  
 				if(UART_RX) //'1'
 				{
 					recvData |= (1 << (recvStat - 1));
@@ -191,8 +194,12 @@ void interrupt ISR(void)
 							if(recvStat == COM_STOP_BIT) //状态为停止位
 							{
 								recvStat = COM_START_BIT; //接收到开始位
-								DelayUs(3); //延时一定时间
+								DelayUs(5); //延时一定时间
+                                
+								TMR0 = TIMER0_RELOAD_VALUE;  
+                                T0IF = 0;
 								T0IE = 1; //打开定时器，接收数据
+
                                  PB3 = 0; //debug
 							}
 							PAIF = 0;  			//清PAIF标志位
