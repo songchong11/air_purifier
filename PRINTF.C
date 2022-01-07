@@ -110,6 +110,8 @@ void tl_putchar(char **out, char c)
 	}
 }
 
+#if ENABLE_PRINT_HEX
+
 /**
  * @brief      This function serves to foramt string.
  * @param[in]  *out -  buffer to output
@@ -128,7 +130,6 @@ void tl_putnum(char **out, unsigned char c) {
 	tl_putchar(out, nib);
 }
 
-
 /**
  * @brief      This function serves to foramt string.
  * @param[in]  *out -  buffer to output
@@ -145,7 +146,9 @@ void tl_putnumber(char **out, unsigned int w,int len) {
 		tl_putnum(out, c);
 	}
 }
+#endif
 
+#if ENABLE_PRINT_INT
 /**
  * @brief      This function serves to foramt string.
  * @param[in]  *out -  buffer to output
@@ -181,6 +184,9 @@ void tl_putint(char **out, int w)
     }
 
 }
+#endif
+
+#if ENABLE_PRINT_STR
 
 /**
  * @brief      This function serves to foramt string.
@@ -200,7 +206,7 @@ void  tl_putstring(char **out, char * str)
            s++;
 	}
 }
-
+#endif
 /**
  * @brief      This function serves to foramt string.
  * @param[in]  *out -  buffer to output
@@ -225,15 +231,22 @@ const char *tl_format_msg(char **out, const char *f, int a)
 		{
 			switch (c)
 			{
+#if ENABLE_PRINT_HEX
 				case 'x':
 					flag = 16;
 					break;
+#endif
+#if ENABLE_PRINT_INT
 				case 'd':
 					flag = 10;
 					break;
+#endif
+#if ENABLE_PRINT_STR
+
 				case 's':
 					flag = 99;
 					break;
+#endif
 				default:
 					tl_putchar(out, '*');
 					flag = -1;
@@ -246,13 +259,18 @@ const char *tl_format_msg(char **out, const char *f, int a)
 			break;
 		}
 	}
+#if ENABLE_PRINT_HEX
 	if(flag == 16)
 	tl_putnumber(out, a,fieldwidth);
-	else if(flag == 10)
+#endif
+#if ENABLE_PRINT_INT
+	if(flag == 10)
 	tl_putint(out, a);
-	else if(flag==99)
+#endif
+#if ENABLE_PRINT_STR
+	if(flag==99)
 	tl_putstring(out, (char *)a);
-
+#endif
 	return f;
 
 }

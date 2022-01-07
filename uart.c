@@ -66,6 +66,7 @@ void TIMER0_INITIAL (void)
 	T0IF = 0;				//清空T0软件中断
 }
 
+#if 0
 
 /*-------------------------------------------------
  *  函数名:WaitTF0
@@ -87,16 +88,17 @@ static void WaitTF0( void )
  *  输入：  无
  *  输出：  无
  --------------------------------------------------*/
-
 void send_a_byte(unchar input)
 {
 		//发送启始位
 		unchar i=8;
 		 
 	
-		T0IE = 1;//启动timer0
+		TMR0 = TIMER0_RELOAD_VALUE;  
+		T0IF = 0;
+		T0IE = 1;
+
 		UART_TX =	0;
-		WaitTF0();
         WaitTF0();
 #if 1
 		//发送8位数据位
@@ -115,9 +117,35 @@ void send_a_byte(unchar input)
 		WaitTF0();
 #endif
 		T0IE = 0;//关闭timer0
+		T0IF = 0;
 }
+#endif
 
+void send_a_byte(unchar input)
+{
+		//发送启始位
+		unchar i=8;
 
+		UART_TX =	0;
+        DelayUs(DELAY_104US);
+#if 1
+		//发送8位数据位
+		while(i--)
+		{
+				UART_TX=(input&0x01);//先传低位
+				 
+				DelayUs(DELAY_104US);
+				 
+				input=input>>1;
+		}
+		 
+		//发送校验位(无)
+		//发送结束位
+		UART_TX= 1;
+		DelayUs(DELAY_104US);;
+#endif
+
+}
 /*-------------------------------------------------
  *  函数名: PA1_Level_Change_INITIAL
  *	功能：  PA端口(PA1)电平变化中断初始化
@@ -135,40 +163,6 @@ void PA1_Level_Change_INITIAL(void)
     //GIE =1;    			     //使能全局中断
 }
 
-#if 0
-/*-------------------------------------------------
- *  函数名: read_a_byte 
- *	功能：  接收一个字符
- *  输入：  无
- *  输出：  无
- --------------------------------------------------*/
-unchar read_a_byte()
-{
-    unchar Output = 0;
-    unchar i = 8;
-    T0IE = 1;               //启动Timer0
-
-    WaitTF0();             //等过起始位
-    WaitTF0();             //等过起始位
- 
-    //发送8位数据位
-    while(i--)
-    {
-        Output >>= 1;
-        if(UART_RX) Output |= 0x80;    //先收低位
-        WaitTF0();                 		 //位间延时
-    }
- 
-	while(!TM0_FLAG)
-	{
-		if(UART_RX) break;
-	}
-
-	T0IE = 0;                        //停止
-
-	return Output;
-}
-#endif
 
 
 

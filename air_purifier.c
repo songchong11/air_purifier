@@ -151,12 +151,13 @@ void interrupt ISR(void)
 				T0IF = 0;
 				
 				TM0_FLAG=1;//清传输标志
-				PB2 = ~PB2; //debug
+				//PB2 = ~PB2; //debug
   
 				/*****Receive byte******/
 				recvStat++; //改变状态机
 				if(recvStat == COM_STOP_BIT) //收到停止位
 				{
+                     rx_buff[rx_cnt++] = recvData;
 					 T0IE = 0; 			//关闭定时器
 					 T0IF = 0;
   
@@ -195,6 +196,7 @@ void interrupt ISR(void)
 						{
 							if(recvStat == COM_STOP_BIT) //状态为停止位
 							{
+								recvData = 0;
 								recvStat = COM_START_BIT; //接收到开始位
 								DelayUs(5); //延时一定时间
                                 
@@ -222,30 +224,30 @@ void main(void)
 	TIMER0_INITIAL();
 	PA1_Level_Change_INITIAL();
 
-//	printf("air purifier progect init\r\n");
+	//printf("air purifier progect init\r\n");
 	GIE  = 1; 				//开中断
-	//T0IE = 0;				//开定时器/计数器0中断
     
-    PB3 = 1; //debug
     PB2 = 1; //debug
-    //===========================================================
-
+    rx_cnt = 0;
+    recvData = 0;
+    memset(rx_buff, 0, sizeof(rx_buff));
     //===============================================================	
 	while(1)
 	{
-		//DelayMs(1000);
-		//send_a_byte(0xA5);
-        if (recvData != 0 && recvStat == COM_STOP_BIT) {
-                rx_buff[rx_cnt++] = recvData;
-                recvData = 0;
-                if (rx_cnt == 6 && rx_buff[0] == 0xaa && rx_buff[5] == 0xf6) {
-                   // printf("loop %1x %1x %1x\r\n", 0xaa, 0xbb, 0xcc);
-                    rx_cnt = 0;
-				}
-		}
-        
 
-  
+
+#if 1
+			//if (rx_cnt == 6 && rx_buff[0] == 0xaa && rx_buff[5] == 0xf6) {
+               if (rx_cnt == 1){
+				for (int i = 0; i < rx_cnt; i++) {
+                    send_a_byte(recvData);
+					send_a_byte(rx_buff[i]);
+				}
+
+                 memset(rx_buff, 0, sizeof(rx_buff));
+				rx_cnt = 0;
+			}
+  #endif
 	}
 }
 //===========================================================

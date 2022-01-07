@@ -3,6 +3,7 @@
 
 #include "SYSCFG.h"
 #include "uart.h"
+#include "string.h"
 
 #define 	unchar     	unsigned char 
 #define 	unint         unsigned int
@@ -10,10 +11,14 @@
 
 
 
-#define  	PRINTF_DEBUG		1
+#define  	PRINTF_DEBUG		0
 
 #if PRINTF_DEBUG
 #include "printf.h"
+#define	  ENABLE_PRINT_HEX		0
+#define	  ENABLE_PRINT_INT		0
+#define	  ENABLE_PRINT_STR		1
+
 											//baud rat is 115200
 #define 	PRINTF_IO	PB7  //PB7 used printf IO
 #endif
@@ -21,6 +26,7 @@
 
 #define 	UART_TX		PB2  //PB2 used for IO UART TX
 #define 	UART_RX		PA1  //PA1 used for IO UART RX
+#define		DELAY_104US	80	 //baud 9600 0.104ms
 
 enum{
 	COM_START_BIT, //ֹͣλ
