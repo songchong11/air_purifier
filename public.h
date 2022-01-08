@@ -4,6 +4,9 @@
 #include "SYSCFG.h"
 #include "uart.h"
 #include "string.h"
+#include "wifi.h"
+#include "mcu_api.h"
+#include "protocol.h"
 
 #define 	unchar     	unsigned char 
 #define 	unint         unsigned int

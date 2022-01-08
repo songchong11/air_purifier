@@ -40,8 +40,8 @@
 #define  	unlong 		unsigned long
 
 unchar recvData;
-unchar rx_buff[20] = {0};
-unchar rx_cnt = 0;
+//unchar rx_buff[20] = {0};
+//unchar rx_cnt = 0;
 /*-------------------------------------------------
  *  函数名：POWER_INITIAL
  *	功能：  上电系统初始化
@@ -158,7 +158,8 @@ void interrupt ISR(void)
 				recvStat++; //改变状态机
 				if(recvStat == COM_STOP_BIT) //收到停止位
 				{
-                     rx_buff[rx_cnt++] = recvData;
+                    // rx_buff[rx_cnt++] = recvData;
+					 uart_receive_input(recvData);
 					 T0IE = 0; 			//关闭定时器
 					 T0IF = 0;
   
@@ -225,31 +226,18 @@ void main(void)
 	POWER_INITIAL();			//系统初始化
 	TIMER0_INITIAL();
 	PA1_Level_Change_INITIAL();
-
-	//printf("air purifier progect init\r\n");
 	GIE  = 1; 				//开中断
-    
+
+    wifi_protocol_init();
+
     UART_TX = 1; //debug
-    rx_cnt = 0;
     recvData = 0;
-    memset(rx_buff, 0, sizeof(rx_buff));
     //===============================================================	
 	while(1)
 	{
-
 		//send_a_byte(0x1A);
-#if 1
-		//	if (rx_cnt == 6 && rx_buff[0] == 0xaa && rx_buff[5] == 0xf6) {
-               if (rx_cnt == 1){
-				for (int i = 0; i < rx_cnt; i++) {
-                    send_a_byte(recvData);
-					send_a_byte(rx_buff[i]);
-				}
-
-                 memset(rx_buff, 0, sizeof(rx_buff));
-				rx_cnt = 0;
-			}
-  #endif
+		wifi_uart_service();
+		NOP();
 	}
 }
 //===========================================================
