@@ -42,6 +42,11 @@
 unchar recvData;
 //unchar rx_buff[20] = {0};
 //unchar rx_cnt = 0;
+
+AIR_PURIFIER air_purif;
+
+
+
 /*-------------------------------------------------
  *  函数名：POWER_INITIAL
  *	功能：  上电系统初始化

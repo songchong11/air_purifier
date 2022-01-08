@@ -14,19 +14,6 @@
 
 
 
-#define  	PRINTF_DEBUG		0
-
-#if PRINTF_DEBUG
-#include "printf.h"
-#define	  ENABLE_PRINT_HEX		0
-#define	  ENABLE_PRINT_INT		0
-#define	  ENABLE_PRINT_STR		1
-
-											//baud rat is 115200
-#define 	PRINTF_IO	PB7  //PB7 used printf IO
-#endif
-
-
 #define 	UART_TX		PB2  //PB2 used for IO UART TX
 #define 	UART_RX		PA1  //PA1 used for IO UART RX
 #define		DELAY_104US	80	 //baud 9600 0.104ms
@@ -47,6 +34,22 @@ enum{
 extern unchar ReadAPin;
 extern unchar recvStat;
 extern unchar recvData;
+
+
+typedef struct {
+  unsigned char  switcher;  //开关
+  unsigned long  pm25; //PM2.5
+  unsigned char  mode; //当前模式
+  unsigned char  anion ; //当前负离子
+  unsigned long  temp_indoor;//温度
+  unsigned long  humidity_indoor;//湿度
+  unsigned long  tovc_indoor;//
+  unsigned char  air_quality;//空气质量
+  unsigned char  unit_convert;//温标切换
+} AIR_PURIFIER;
+
+extern AIR_PURIFIER air_purif;
+
 extern void PA1_Level_Change_INITIAL(void);
 extern  unsigned char  TM0_FLAG ;
 extern void DelayUs(unsigned char Time);
@@ -54,13 +57,10 @@ extern void send_a_byte(unchar input);
 
 
 
-#define BIT(n)                  		( 1<<(n) )
+#define BIT(n)                  (1<<(n))
 #define BIT_SET(x, n)         	((x) |=  BIT(n))
 #define BIT_CLR(x, n)       	((x) &= ~ BIT(n))
 #define BIT_IS_SET(x, n)   		((x) & BIT(n))
-#define BIT_FLIP(x, n)   		((x) ^= BIT(n))
-#define BIT_SET_HIGH(x) 		((x) |=  BIT((sizeof((x))*8-1)))				// set the highest bit
-#define BIT_CLR_HIGH(x) 		((x) &= ~ BIT((sizeof((x))*8-1)))				// clr the highest bit
-#define BIT_IS_SET_HIGH(x) 		((x) & BIT((sizeof((x))*8-1)))				// check the higest bit
+
 
 #endif

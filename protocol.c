@@ -27,7 +27,7 @@
 2:程序正常初始化完成后,建议不进行关串口中断,如必须关中断,关中断时间必须短,关中断会引起串口数据包丢失
 3:请勿在中断/定时器中断内调用上报函数
 ******************************************************************************/
-
+#include "public.h"
 #include "wifi.h"
 
 #ifdef WEATHER_ENABLE
@@ -121,7 +121,6 @@ const DOWNLOAD_CMD_S download_cmd[] =
 void uart_transmit_output(unsigned char value)
 {
    // #error "请将MCU串口发送函数填入该函数,并删除该行"
-		extern void send_a_byte(unchar input);
 		send_a_byte(value);
 /*
     //Example:
@@ -158,29 +157,29 @@ void all_data_update(void)
 {
    // #error "请在此处理可下发可上报数据及只上报数据示例,处理完成后删除该行"
     //此代码为平台自动生成，请按照实际数据修改每个可下发可上报函数和只上报函数
-    mcu_dp_bool_update(DPID_SWITCH,当前开关); //BOOL型数据上报;
-    mcu_dp_value_update(DPID_PM25,当前PM2.5); //VALUE型数据上报;
-    mcu_dp_enum_update(DPID_MODE,当前模式); //枚举型数据上报;
+    mcu_dp_bool_update(DPID_SWITCH,air_purif.switcher); //BOOL型数据上报;
+    mcu_dp_value_update(DPID_PM25, air_purif.pm25); //VALUE型数据上报;
+    mcu_dp_enum_update(DPID_MODE,air_purif.mode); //枚举型数据上报;
     //mcu_dp_enum_update(DPID_FAN_SPEED_ENUM,当前风速); //枚举型数据上报;
     //mcu_dp_value_update(DPID_FILTER_LIFE,当前滤芯寿命); //VALUE型数据上报;
-    mcu_dp_bool_update(DPID_ANION,当前负离子); //BOOL型数据上报;
+    mcu_dp_bool_update(DPID_ANION,air_purif.anion); //BOOL型数据上报;
     //mcu_dp_bool_update(DPID_CHILD_LOCK,当前童锁); //BOOL型数据上报;
     //mcu_dp_bool_update(DPID_LIGHT,当前灯光); //BOOL型数据上报;
     //mcu_dp_bool_update(DPID_UV,当前UV杀菌); //BOOL型数据上报;
     //mcu_dp_bool_update(DPID_WET,当前加湿); //BOOL型数据上报;
     //mcu_dp_bool_update(DPID_FILTER_RESET,当前滤芯复位); //BOOL型数据上报;
-    mcu_dp_value_update(DPID_TEMP_INDOOR,当前室内温度); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_HUMIDITY,当前室内湿度); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_TVOC,当前TVOC); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_TEMP_INDOOR,air_purif.temp_indoor); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_HUMIDITY,air_purif.humidity_indoor); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_TVOC, air_purif.tovc_indoor); //VALUE型数据上报;
     //mcu_dp_value_update(DPID_ECO2,当前eCO2); //VALUE型数据上报;
     //mcu_dp_value_update(DPID_FILTER_DAYS,当前滤芯剩余天数); //VALUE型数据上报;
     //mcu_dp_value_update(DPID_RUNTIME_TOTAL,当前累计工作时间); //VALUE型数据上报;
     //mcu_dp_enum_update(DPID_COUNTDOWN_SET,当前倒计时); //枚举型数据上报;
     //mcu_dp_value_update(DPID_COUNTDOWN_LEFT,当前倒计时剩余时间); //VALUE型数据上报;
     //mcu_dp_value_update(DPID_PM_TOTAL,当前累计吸收颗粒); //VALUE型数据上报;
-    mcu_dp_enum_update(DPID_AIR_QUALITY,当前空气质量); //枚举型数据上报;
+    mcu_dp_enum_update(DPID_AIR_QUALITY,air_purif.air_quality); //枚举型数据上报;
     //mcu_dp_fault_update(DPID_FAULT,当前故障告警); //故障型数据上报;
-    mcu_dp_enum_update(DPID_TEMP_UNIT_CONVERT,当前温标切换); //枚举型数据上报;
+    mcu_dp_enum_update(DPID_TEMP_UNIT_CONVERT,air_purif.unit_convert); //枚举型数据上报;
     //mcu_dp_value_update(DPID_TEMP_SET,当前温度设置); //VALUE型数据上报;
     //mcu_dp_value_update(DPID_TEMP_SET_F,当前目标温度_F); //VALUE型数据上报;
     //mcu_dp_value_update(DPID_TEMP_CURRENT_F,当前当前温度_F); //VALUE型数据上报;
