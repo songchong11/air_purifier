@@ -44,6 +44,8 @@
 unchar ReadAPin;
 
 unchar recvStat = COM_STOP_BIT; //定义接收状态机
+
+#if CONFIG_RX_USE_T0
 /*----------------------------------------------------
  *	函数名称：TIMER0_INITIAL
  *	功能：初始化设置定时器
@@ -65,6 +67,68 @@ void TIMER0_INITIAL (void)
 	T0IF = 0;				//清空T0软件中断
 }
 
+#else
+/*-------------------------------------------------
+ * 函数名称：   TIMER2_INITIAL
+ * 功能：      初始化设置定时器2 
+ * 相关寄存器： T2CON TMR2 PR2 TMR2IE TMR2IF PEIE GIE 
+ -------------------------------------------------*/
+void TIMER2_INITIAL (void) 
+{    
+    T2CON0  = 0B00000000; 			//T2预分频1:1，后分频1：4
+    //BIT7: 0：无意义； 1：把PR2/P1xDTy缓冲值分别更新到PR2寄存器和P1xDTy_ACT
+    //BIT6~BIT3: 定时器2输出后分频比选择 0000:1:1;0001:1:2;……1:16
+    //BIT2:0:关闭定时器2；1：打开定时器2
+    //BIT1~0:定时器2预分频选择 00:1;01:4;1x:16
+    
+	T2CON1  = 0B00000000;		   //T2时钟来自系统时钟,PWM1连续模式
+	//BIT4: PWM模式选择 0:连续模式；1：单脉冲模式
+    //BIT3: 0:PWM模式；1：蜂鸣器模式	
+    //Timer2时钟源选择：000：指令时钟；001：系统时钟；010：HIRC的2倍频；100：HIRC；101：LIRC
+    						
+    TMR2H  	= T2_RELOAD_VALUE_H;					//定时器2计数寄存器  =1/16*2*4*200
+    TMR2L  	= T2_RELOAD_VALUE_L;//104us
+    
+    
+	PR2H    = T2_RELOAD_VALUE_H; 					//周期=（PR+1）*Tt2ck*TMR2预分频(蜂鸣器模式周期*2)
+	PR2L    = T2_RELOAD_VALUE_L;	  
+    
+    P1ADTH	= 0;					//脉宽=P1xDT*Tt2ck*TMR2预分频(蜂鸣器模式没用到)
+    P1ADTL	= 50;
+    
+    P1OE 	= 0B00000000;			//充许P1A0输出PWM（配置成timer定时器时这位清零）
+    //BIT7: 0:禁止P1C输出到管脚;1:充许P1C输出到管脚
+    //BIT6: 0:禁止P1B输出到管脚;1:充许P1B输出到管脚
+    //BIT5~BIT0: 0:禁止P1Ax输出到管脚;1:充许P1Ax输出到管脚
+    
+    P1POL 	= 0B00000000;			//高电平有效
+    //BIT7: 0:P1C高电平有效;1:P1C低电平有效
+    //BIT6: 0:P1B高电平有效;1:P1B低电平有效
+    //BIT5~BIT0: 0:P1Ax高电平有效;1:P1Ax低电平有效
+    
+    P1CON	= 0B00000000;
+    //BIT7:PWM1 重启使能位
+	//1 = 故障刹车时，P1BEVT位在退出关闭事件时自动清零，PWM1自动重启
+	//0 = 故障刹车时，必须用软件将P1BEVT清零以重启PWM1
+    //BIT6~0:PWM1死区时间设置
+	//P1DCn = 预定MPWM信号应转变为有效与PWM信号实际转为有效之间的T2CK周期数
+        
+    MSCON0   = 0B00110000;		    //bit0: 0:T2睡眠时停止工作	
+    //BIT5:PSRCAH4和PSRCA[4]共同决定源电流。00：4mA; 11: 33mA; 01、10:8mA
+    //BIT4:PSRCAH3和PSRCA[3]共同决定源电流。00：4mA; 11: 33mA; 01、10:8mA
+    //BIT3:UCFG1<1:0>为01时此位有意义。0：禁止LVR；1：打开LVR
+    //BIT2:快时钟测量慢周期的平均模式。0：关闭平均模式；1：打开平均模式
+    //BIT1:0：关闭快时钟测量慢周期；1：打开快时钟测量慢周期
+    //BIT0:0：睡眠时停止工作：1： 睡眠时保持工作。当T2时钟不是选择指令时钟的时候
+     
+				 					//设置TMR2输出比较值定时15us=(1/4000000)*60(PR2)
+	TMR2IF  = 0;					//清TMER2中断标志
+	TMR2IE = 1;						//使能TMER2的中断（配置成timer定时器时不注释）
+	TMR2ON  = 1;					//使能TMER2启动
+	PEIE    = 1;    				//使能外设中断
+	GIE     = 1;   					//使能全局中断
+}
+#endif
 
 void send_a_byte(unchar input)
 {

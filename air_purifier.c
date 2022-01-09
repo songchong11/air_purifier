@@ -149,7 +149,7 @@ void DelayS(unsigned char Time)
 //===========================================================
 void interrupt ISR(void)
 {
-		#if 1
+		#if CONFIG_RX_USE_T0
 		  //定时器0的中断处理**********************
 		if(T0IE && T0IF)                //8.192ms翻转一次≈60Hz
 		{
@@ -188,14 +188,53 @@ void interrupt ISR(void)
 				}
 				
 		}
-        
+       #endif
+	   
+	   #if CONFIG_RX_USE_T2
+		//定时器2的中断处理**********************
+		if(TMR2IE && TMR2IF)                //8.192ms翻转一次≈60Hz
+		{
+				TMR2IF = 0;
+
+				PB7 = ~PB7; //debug
+  
+				/*****Receive byte******/
+				recvStat++; //改变状态机
+				if(recvStat == COM_STOP_BIT) //收到停止位
+				{
+                    // rx_buff[rx_cnt++] = recvData;
+					 uart_receive_input(recvData);
+					 TMR2IE = 0;    //关定时器2 
+
+					 TRISA1 = 1;
+					 ReadAPin = PORTA;	     //清PA电平变化中断 must
+                     PAIE = 1;  			//开启PA中断
+                     IOCA1 =1;  			//开启PA1电平变化中断
+					 PB3 = 1;//debug
+					return; //并返回
+				}
+  
+				if(UART_RX) //'1'
+				{
+					recvData |= (1 << (recvStat - 1));
+                    PB3 = 1;
+				}
+				else //'0'
+				{
+					recvData &= ~(1 <<(recvStat - 1));
+                    PB3 = 0;
+				}
+				
+		}
+		#endif
+
+	   
 	  //PA电平变化中断**********************
 		 if(PAIE && PAIF)
 		{
 				ReadAPin = PORTA; 	//读取PORTA数据清PAIF标志
 				PAIE = 0;  			//暂先禁止PA中断
 				
-				#if 1
 				if (!(PORTA  & BIT(1))) 
                 {
  
@@ -207,19 +246,26 @@ void interrupt ISR(void)
 							{
 								recvData = 0;
 								recvStat = COM_START_BIT; //接收到开始位
-
+#if CONFIG_RX_USE_T0
 								TMR0 = TIMER0_RELOAD_VALUE;  
                                 T0IF = 0;
 								T0IE = 1; //打开定时器，接收数据
+#else
+								TMR2H	= T2_RELOAD_VALUE_H;					//定时器2计数寄存器  =1/16*2*4*200
+								TMR2L	= T2_RELOAD_VALUE_L;//104us
+								PR2H	= T2_RELOAD_VALUE_H;					//周期=（PR+1）*Tt2ck*TMR2预分频(蜂鸣器模式周期*2)
+								PR2L	= T2_RELOAD_VALUE_L;
+
+								TMR2IF = 0;
+								TMR2IE = 1; //打开定时器，接收数据
+#endif
 
                                 PB3 = 0; //debug
 							}
 							PAIF = 0;  			//清PAIF标志位
 						}      
 				}
-                #endif
 		}
-		#endif
 }
 /*-------------------------------------------------
  *  函数名: main 
@@ -230,7 +276,11 @@ void interrupt ISR(void)
 void main(void)
 {
 	POWER_INITIAL();			//系统初始化
+	#if CONFIG_RX_USE_T0
 	TIMER0_INITIAL();
+	#else
+	TIMER2_INITIAL();
+	#endif
 	PA1_Level_Change_INITIAL();
 	GIE  = 1; 				//开中断
 
