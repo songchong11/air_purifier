@@ -5,12 +5,12 @@
 //Company: 
 //Version:
 //   Date: 
-/*  ÎÄ¼þÃû uart.c
-*	¹¦ÄÜ£º IOÄ£ÄâuartÊ±Ðò
+/*  æ–‡ä»¶å uart.c
+*	åŠŸèƒ½ï¼š IOæ¨¡æ‹Ÿuartæ—¶åº
 *   IC:    FT61F13 SOP20
-*   ¾§Õñ£º  16M/2T                    
-*   ËµÃ÷£º ²¨ÌØÂÊ9600, ´«Êä1bitµÄÊ±¼äÔ¼µÈÓÚ0.104ms
-*		        Êý¾ÝÓÉ1bitÆðÊ¼Î»+8bitÊý¾ÝÎ»+1bitÍ£Ö¹Î»¹²10bitµÄÊý¾ÝÖ¡×é³É£¬ÆðÊ¼Î»ÎªµÍµçÆ½£¬Í£Ö¹Î»Îª¸ßµçÆ½
+*   æ™¶æŒ¯ï¼š  16M/2T                    
+*   è¯´æ˜Žï¼š æ³¢ç‰¹çŽ‡9600, ä¼ è¾“1bitçš„æ—¶é—´çº¦ç­‰äºŽ0.104ms
+*		        æ•°æ®ç”±1bitèµ·å§‹ä½+8bitæ•°æ®ä½+1bitåœæ­¢ä½å…±10bitçš„æ•°æ®å¸§ç»„æˆï¼Œèµ·å§‹ä½ä¸ºä½Žç”µå¹³ï¼Œåœæ­¢ä½ä¸ºé«˜ç”µå¹³
 *
 *
 *                  FT61F13  SOP20
@@ -35,132 +35,77 @@
 //===========================================================
 //Variable definition
 //===========================================================
-//ºê¶¨Òå****************************************************
+//å®å®šä¹‰****************************************************
 #define 	unchar     	unsigned char 
 #define 	unint         unsigned int
 #define  	unlong 		unsigned long
 
-unsigned char  TM0_FLAG  = 0;
 
 unchar ReadAPin;
 
-unchar recvStat = COM_STOP_BIT; //¶¨Òå½ÓÊÕ×´Ì¬»ú
+unchar recvStat = COM_STOP_BIT; //å®šä¹‰æŽ¥æ”¶çŠ¶æ€æœº
 /*----------------------------------------------------
- *	º¯ÊýÃû³Æ£ºTIMER0_INITIAL
- *	¹¦ÄÜ£º³õÊ¼»¯ÉèÖÃ¶¨Ê±Æ÷
- *	Ïà¹Ø¼Ä´æÆ÷£ºT0CS T0SE PSA 
- *	ÉèÖÃTMR0¶¨Ê±Ê±³¤8.192ms=(1/16000000)*2*256*255(16M-2T-PSA 1:256- TMR0=255Òç³ö)
-  * Bit2:0 PS2 8¸öÔ¤·ÖÆµ±È 100 :32·ÖÆµ
- * ÉèÖÃTMR0¶¨Ê±Ê±³¤0.104ms=(1/16000000)*2*8*(104)
+ *	å‡½æ•°åç§°ï¼šTIMER0_INITIAL
+ *	åŠŸèƒ½ï¼šåˆå§‹åŒ–è®¾ç½®å®šæ—¶å™¨
+ *	ç›¸å…³å¯„å­˜å™¨ï¼šT0CS T0SE PSA 
+ *	è®¾ç½®TMR0å®šæ—¶æ—¶é•¿8.192ms=(1/16000000)*2*256*255(16M-2T-PSA 1:256- TMR0=255æº¢å‡º)
+  * Bit2:0 PS2 8ä¸ªé¢„åˆ†é¢‘æ¯” 100 :32åˆ†é¢‘
+ * è®¾ç½®TMR0å®šæ—¶æ—¶é•¿0.104ms=(1/16000000)*2*8*(104)
 	255 - 104 = 151;
  ----------------------------------------------------*/
 void TIMER0_INITIAL (void)  
 {
-	OPTION = 0B00000010;	//Bit5 T0CS Timer0Ê±ÖÓÔ´Ñ¡Ôñ 
-							//1-Íâ²¿Òý½ÅµçÆ½±ä»¯T0CKI 0-ÄÚ²¿Ê±ÖÓ(FOSC/2)
-							//Bit4 T0CKIÒý½Å´¥·¢·½Ê½ 1-ÏÂ½µÑØ 0-ÉÏÉýÑØ
-							//Bit3 PSA Ô¤·ÖÆµÆ÷·ÖÅäÎ» 0-Timer0 1-WDT 
-							//Bit2:0 PS2 8¸öÔ¤·ÖÆµ±È 111 - 1:256
+	OPTION = 0B00000010;	//Bit5 T0CS Timer0æ—¶é’Ÿæºé€‰æ‹© 
+							//1-å¤–éƒ¨å¼•è„šç”µå¹³å˜åŒ–T0CKI 0-å†…éƒ¨æ—¶é’Ÿ(FOSC/2)
+							//Bit4 T0CKIå¼•è„šè§¦å‘æ–¹å¼ 1-ä¸‹é™æ²¿ 0-ä¸Šå‡æ²¿
+							//Bit3 PSA é¢„åˆ†é¢‘å™¨åˆ†é…ä½ 0-Timer0 1-WDT 
+							//Bit2:0 PS2 8ä¸ªé¢„åˆ†é¢‘æ¯” 111 - 1:256
                             
 	TMR0 = TIMER0_RELOAD_VALUE;
-	T0IF = 0;				//Çå¿ÕT0Èí¼þÖÐ¶Ï
+	T0IF = 0;				//æ¸…ç©ºT0è½¯ä»¶ä¸­æ–­
 }
 
-#if 0
-
-/*-------------------------------------------------
- *  º¯ÊýÃû:WaitTF0
- *	¹¦ÄÜ£º //²éÑ¯´«Êä±êÖ¾Î»
- *  ÊäÈë£º  ÎÞ
- *  Êä³ö£º  ÎÞ
- --------------------------------------------------*/
-
-static void WaitTF0( void )
-{
-	while(!TM0_FLAG) ;
- 
-	TM0_FLAG=0; //Çå±êÖ¾Î»
-}
-
-/*-------------------------------------------------
- *  º¯ÊýÃû: send_a_byte 
- *	¹¦ÄÜ£º  ·¢ËÍÒ»¸ö×Ö·û
- *  ÊäÈë£º  ÎÞ
- *  Êä³ö£º  ÎÞ
- --------------------------------------------------*/
-void send_a_byte(unchar input)
-{
-		//·¢ËÍÆôÊ¼Î»
-		unchar i=8;
-		 
-	
-		TMR0 = TIMER0_RELOAD_VALUE;  
-		T0IF = 0;
-		T0IE = 1;
-
-		UART_TX =	0;
-        WaitTF0();
-#if 1
-		//·¢ËÍ8Î»Êý¾ÝÎ»
-		while(i--)
-		{
-				UART_TX=(input&0x01);//ÏÈ´«µÍÎ»
-				 
-				WaitTF0();
-				 
-				input=input>>1;
-		}
-		 
-		//·¢ËÍÐ£ÑéÎ»(ÎÞ)
-		//·¢ËÍ½áÊøÎ»
-		UART_TX= 1;
-		WaitTF0();
-#endif
-		T0IE = 0;//¹Ø±Õtimer0
-		T0IF = 0;
-}
-#endif
 
 void send_a_byte(unchar input)
 {
-		//·¢ËÍÆôÊ¼Î»
+		//å‘é€å¯å§‹ä½
 		unchar i=8;
 
 		UART_TX =	0;
         DelayUs(DELAY_104US);
 #if 1
-		//·¢ËÍ8Î»Êý¾ÝÎ»
+		//å‘é€8ä½æ•°æ®ä½
 		while(i--)
 		{
-				UART_TX=(input&0x01);//ÏÈ´«µÍÎ»
+				UART_TX=(input&0x01);//å…ˆä¼ ä½Žä½
 				 
 				DelayUs(DELAY_104US);
 				 
 				input=input>>1;
 		}
 		 
-		//·¢ËÍÐ£ÑéÎ»(ÎÞ)
-		//·¢ËÍ½áÊøÎ»
+		//å‘é€æ ¡éªŒä½(æ— )
+		//å‘é€ç»“æŸä½
 		UART_TX= 1;
 		DelayUs(DELAY_104US);;
 #endif
 
 }
 /*-------------------------------------------------
- *  º¯ÊýÃû: PA1_Level_Change_INITIAL
- *	¹¦ÄÜ£º  PA¶Ë¿Ú(PA1)µçÆ½±ä»¯ÖÐ¶Ï³õÊ¼»¯
- *  ÊäÈë£º  ÎÞ
- *  Êä³ö£º  ÎÞ
+ *  å‡½æ•°å: PA1_Level_Change_INITIAL
+ *	åŠŸèƒ½ï¼š  PAç«¯å£(PA1)ç”µå¹³å˜åŒ–ä¸­æ–­åˆå§‹åŒ–
+ *  è¾“å…¥ï¼š  æ— 
+ *  è¾“å‡ºï¼š  æ— 
 --------------------------------------------------*/
 void PA1_Level_Change_INITIAL(void)
 {
  
 	TRISA1 =1; 			     //SET PA1 INPUT
-	ReadAPin = PORTA;	     //ÇåPAµçÆ½±ä»¯ÖÐ¶Ï
-	PAIF =0;   			     //ÇåPA INTÖÐ¶Ï±êÖ¾Î»
-    IOCA1 =1;  			     //Ê¹ÄÜPA1µçÆ½±ä»¯ÖÐ¶Ï
-	PAIE =1;   			     //Ê¹ÄÜPA INTÖÐ¶Ï
-    //GIE =1;    			     //Ê¹ÄÜÈ«¾ÖÖÐ¶Ï
+	ReadAPin = PORTA;	     //æ¸…PAç”µå¹³å˜åŒ–ä¸­æ–­
+	PAIF =0;   			     //æ¸…PA INTä¸­æ–­æ ‡å¿—ä½
+    IOCA1 =1;  			     //ä½¿èƒ½PA1ç”µå¹³å˜åŒ–ä¸­æ–­
+	PAIE =1;   			     //ä½¿èƒ½PA INTä¸­æ–­
+    //GIE =1;    			     //ä½¿èƒ½å…¨å±€ä¸­æ–­
 }
 
 

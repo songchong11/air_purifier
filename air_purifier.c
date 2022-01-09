@@ -67,6 +67,7 @@ void POWER_INITIAL (void)
 	TRISB  = 0B01110011;	//PB输入输出 0-输出 1-输入  
 											//PB2配置为输出
                                             //PB3配置为输出
+                                            //PB7配置为输出
 	PORTC  = 0B00000000; 	
 	TRISC  = 0B11111111;	//PC输入输出 0-输出 1-输入  
 								
@@ -156,8 +157,7 @@ void interrupt ISR(void)
 
 				T0IF = 0;
 				
-				TM0_FLAG=1;//清传输标志
-				//PB2 = ~PB2; //debug
+				PB7 = ~PB7; //debug
   
 				/*****Receive byte******/
 				recvStat++; //改变状态机
@@ -167,10 +167,12 @@ void interrupt ISR(void)
 					 uart_receive_input(recvData);
 					 T0IE = 0; 			//关闭定时器
 					 T0IF = 0;
-  
+
+					 TRISA1 = 1;
+					 ReadAPin = PORTA;	     //清PA电平变化中断 must
                      PAIE = 1;  			//开启PA中断
                      IOCA1 =1;  			//开启PA1电平变化中断
-					 PB3 = 1;
+					 PB3 = 1;//debug
 					return; //并返回
 				}
   
@@ -205,13 +207,12 @@ void interrupt ISR(void)
 							{
 								recvData = 0;
 								recvStat = COM_START_BIT; //接收到开始位
-								DelayUs(5); //延时一定时间
-                                
+
 								TMR0 = TIMER0_RELOAD_VALUE;  
                                 T0IF = 0;
 								T0IE = 1; //打开定时器，接收数据
 
-                                 PB3 = 0; //debug
+                                PB3 = 0; //debug
 							}
 							PAIF = 0;  			//清PAIF标志位
 						}      
@@ -235,14 +236,14 @@ void main(void)
 
     wifi_protocol_init();
 
-    UART_TX = 1; //debug
+    UART_TX = 1;
     recvData = 0;
+	PB3 = 1; //debug
     //===============================================================	
 	while(1)
 	{
 		//send_a_byte(0x1A);
 		wifi_uart_service();
-		NOP();
 	}
 }
 //===========================================================

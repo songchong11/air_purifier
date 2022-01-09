@@ -19,7 +19,7 @@
 #define		DELAY_104US	80	 //baud 9600 0.104ms
 
 enum{
-	COM_START_BIT, //ֹͣλ
+	COM_START_BIT = 0, //ֹͣλ
 	COM_D0_BIT, //bit0
 	COM_D1_BIT, //bit1
 	COM_D2_BIT, //bit2
@@ -51,7 +51,6 @@ typedef struct {
 extern AIR_PURIFIER air_purif;
 
 extern void PA1_Level_Change_INITIAL(void);
-extern  unsigned char  TM0_FLAG ;
 extern void DelayUs(unsigned char Time);
 extern void send_a_byte(unchar input);
 
