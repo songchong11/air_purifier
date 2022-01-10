@@ -121,8 +121,7 @@ mcu在wifi模块正确联网后可调用mcu_get_system_time()函数发起校时�
 并在protocol.c文件wifi_test_result函数内查看测试结果,
 wifi_test_result内部有#err提示,完成函数后请删除该#err
 ******************************************************************************/
-// TODO:check
-//#define         WIFI_TEST_ENABLE                //开启WIFI产测功能（扫描指定路由）
+#define         WIFI_TEST_ENABLE                //开启WIFI产测功能（扫描指定路由）
 
 /******************************************************************************
                       7:是否开启天气功能
@@ -273,27 +272,9 @@ BLE_test_result内部有#err提示,完成函数后请删除该#err
 //风速(可下发可上报)
 //备注:
 #define DPID_FAN_SPEED_ENUM 4
-//滤芯寿命(只上报)
-//备注:
-#define DPID_FILTER_LIFE 5
 //负离子(可下发可上报)
 //备注:
 #define DPID_ANION 6
-//童锁(可下发可上报)
-//备注:
-#define DPID_CHILD_LOCK 7
-//灯光(可下发可上报)
-//备注:
-#define DPID_LIGHT 8
-//UV杀菌(可下发可上报)
-//备注:
-#define DPID_UV 9
-//加湿(可下发可上报)
-//备注:
-#define DPID_WET 10
-//滤芯复位(可下发可上报)
-//备注:
-#define DPID_FILTER_RESET 11
 //室内温度(只上报)
 //备注:
 #define DPID_TEMP_INDOOR 12
@@ -303,45 +284,12 @@ BLE_test_result内部有#err提示,完成函数后请删除该#err
 //TVOC(只上报)
 //备注:
 #define DPID_TVOC 14
-//eCO2(只上报)
-//备注:
-#define DPID_ECO2 15
-//滤芯剩余天数(只上报)
-//备注:
-#define DPID_FILTER_DAYS 16
-//累计工作时间(只上报)
-//备注:
-#define DPID_RUNTIME_TOTAL 17
-//倒计时(可下发可上报)
-//备注:
-#define DPID_COUNTDOWN_SET 18
-//倒计时剩余时间(只上报)
-//备注:
-#define DPID_COUNTDOWN_LEFT 19
-//累计吸收颗粒(只上报)
-//备注:
-#define DPID_PM_TOTAL 20
 //空气质量(只上报)
 //备注:
 #define DPID_AIR_QUALITY 21
-//故障告警(只上报)
-//备注:
-#define DPID_FAULT 22
 //温标切换(可下发可上报)
 //备注:
 #define DPID_TEMP_UNIT_CONVERT 23
-//温度设置(可下发可上报)
-//备注:
-#define DPID_TEMP_SET 24
-//目标温度_F(可下发可上报)
-//备注:
-#define DPID_TEMP_SET_F 25
-//当前温度_F(只上报)
-//备注:
-#define DPID_TEMP_CURRENT_F 26
-//甲醛检测值(只上报)
-//备注:
-#define DPID_CH2O_VALUE 27
 
 
 

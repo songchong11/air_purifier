@@ -81,29 +81,12 @@ const DOWNLOAD_CMD_S download_cmd[] =
   {DPID_PM25, DP_TYPE_VALUE},
   {DPID_MODE, DP_TYPE_ENUM},
   {DPID_FAN_SPEED_ENUM, DP_TYPE_ENUM},
-  {DPID_FILTER_LIFE, DP_TYPE_VALUE},
   {DPID_ANION, DP_TYPE_BOOL},
-  {DPID_CHILD_LOCK, DP_TYPE_BOOL},
-  {DPID_LIGHT, DP_TYPE_BOOL},
-  {DPID_UV, DP_TYPE_BOOL},
-  {DPID_WET, DP_TYPE_BOOL},
-  {DPID_FILTER_RESET, DP_TYPE_BOOL},
   {DPID_TEMP_INDOOR, DP_TYPE_VALUE},
   {DPID_HUMIDITY, DP_TYPE_VALUE},
   {DPID_TVOC, DP_TYPE_VALUE},
-  {DPID_ECO2, DP_TYPE_VALUE},
-  {DPID_FILTER_DAYS, DP_TYPE_VALUE},
-  {DPID_RUNTIME_TOTAL, DP_TYPE_VALUE},
-  {DPID_COUNTDOWN_SET, DP_TYPE_ENUM},
-  {DPID_COUNTDOWN_LEFT, DP_TYPE_VALUE},
-  {DPID_PM_TOTAL, DP_TYPE_VALUE},
   {DPID_AIR_QUALITY, DP_TYPE_ENUM},
-  {DPID_FAULT, DP_TYPE_BITMAP},
   {DPID_TEMP_UNIT_CONVERT, DP_TYPE_ENUM},
-  {DPID_TEMP_SET, DP_TYPE_VALUE},
-  {DPID_TEMP_SET_F, DP_TYPE_VALUE},
-  {DPID_TEMP_CURRENT_F, DP_TYPE_VALUE},
-  {DPID_CH2O_VALUE, DP_TYPE_VALUE},
 };
 
 
@@ -160,31 +143,13 @@ void all_data_update(void)
     mcu_dp_bool_update(DPID_SWITCH,air_purif.switcher); //BOOL型数据上报;
     mcu_dp_value_update(DPID_PM25, air_purif.pm25); //VALUE型数据上报;
     mcu_dp_enum_update(DPID_MODE,air_purif.mode); //枚举型数据上报;
-    //mcu_dp_enum_update(DPID_FAN_SPEED_ENUM,当前风速); //枚举型数据上报;
-    //mcu_dp_value_update(DPID_FILTER_LIFE,当前滤芯寿命); //VALUE型数据上报;
+    mcu_dp_enum_update(DPID_FAN_SPEED_ENUM,air_purif.fun_speed); //枚举型数据上报;
     mcu_dp_bool_update(DPID_ANION,air_purif.anion); //BOOL型数据上报;
-    //mcu_dp_bool_update(DPID_CHILD_LOCK,当前童锁); //BOOL型数据上报;
-    //mcu_dp_bool_update(DPID_LIGHT,当前灯光); //BOOL型数据上报;
-    //mcu_dp_bool_update(DPID_UV,当前UV杀菌); //BOOL型数据上报;
-    //mcu_dp_bool_update(DPID_WET,当前加湿); //BOOL型数据上报;
-    //mcu_dp_bool_update(DPID_FILTER_RESET,当前滤芯复位); //BOOL型数据上报;
     mcu_dp_value_update(DPID_TEMP_INDOOR,air_purif.temp_indoor); //VALUE型数据上报;
     mcu_dp_value_update(DPID_HUMIDITY,air_purif.humidity_indoor); //VALUE型数据上报;
     mcu_dp_value_update(DPID_TVOC, air_purif.tovc_indoor); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_ECO2,当前eCO2); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_FILTER_DAYS,当前滤芯剩余天数); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_RUNTIME_TOTAL,当前累计工作时间); //VALUE型数据上报;
-    //mcu_dp_enum_update(DPID_COUNTDOWN_SET,当前倒计时); //枚举型数据上报;
-    //mcu_dp_value_update(DPID_COUNTDOWN_LEFT,当前倒计时剩余时间); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_PM_TOTAL,当前累计吸收颗粒); //VALUE型数据上报;
     mcu_dp_enum_update(DPID_AIR_QUALITY,air_purif.air_quality); //枚举型数据上报;
-    //mcu_dp_fault_update(DPID_FAULT,当前故障告警); //故障型数据上报;
     mcu_dp_enum_update(DPID_TEMP_UNIT_CONVERT,air_purif.unit_convert); //枚举型数据上报;
-    //mcu_dp_value_update(DPID_TEMP_SET,当前温度设置); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_TEMP_SET_F,当前目标温度_F); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_TEMP_CURRENT_F,当前当前温度_F); //VALUE型数据上报;
-    //mcu_dp_value_update(DPID_CH2O_VALUE,当前甲醛检测值); //VALUE型数据上报;
-
 }
 
 
@@ -314,209 +279,18 @@ static unsigned char dp_download_anion_handle(const unsigned char value[], unsig
 {
     //示例:当前DP类型为BOOL
     unsigned char ret;
-    //0:关/1:开
+    //0:off/1:on
     unsigned char anion;
     
     anion = mcu_get_dp_download_bool(value,length);
     if(anion == 0) {
-        //开关关
+        //bool off
     }else {
-        //开关开
+        //bool on
     }
   
-    //处理完DP数据后应有反馈
+    //There should be a report after processing the DP
     ret = mcu_dp_bool_update(DPID_ANION,anion);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_child_lock_handle
-功能描述 : 针对DPID_CHILD_LOCK的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_child_lock_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char child_lock;
-    
-    child_lock = mcu_get_dp_download_bool(value,length);
-    if(child_lock == 0) {
-        //开关关
-    }else {
-        //开关开
-    }
-  
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_CHILD_LOCK,child_lock);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_light_handle
-功能描述 : 针对DPID_LIGHT的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_light_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char light;
-    
-    light = mcu_get_dp_download_bool(value,length);
-    if(light == 0) {
-        //开关关
-    }else {
-        //开关开
-    }
-  
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_LIGHT,light);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_uv_handle
-功能描述 : 针对DPID_UV的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_uv_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char uv;
-    
-    uv = mcu_get_dp_download_bool(value,length);
-    if(uv == 0) {
-        //开关关
-    }else {
-        //开关开
-    }
-  
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_UV,uv);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_wet_handle
-功能描述 : 针对DPID_WET的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_wet_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char wet;
-    
-    wet = mcu_get_dp_download_bool(value,length);
-    if(wet == 0) {
-        //开关关
-    }else {
-        //开关开
-    }
-  
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_WET,wet);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_filter_reset_handle
-功能描述 : 针对DPID_FILTER_RESET的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_filter_reset_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为BOOL
-    unsigned char ret;
-    //0:关/1:开
-    unsigned char filter_reset;
-    
-    filter_reset = mcu_get_dp_download_bool(value,length);
-    if(filter_reset == 0) {
-        //开关关
-    }else {
-        //开关开
-    }
-  
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_bool_update(DPID_FILTER_RESET,filter_reset);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_countdown_set_handle
-功能描述 : 针对DPID_COUNTDOWN_SET的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_countdown_set_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为ENUM
-    unsigned char ret;
-    unsigned char countdown_set;
-    
-    countdown_set = mcu_get_dp_download_enum(value,length);
-    switch(countdown_set) {
-        case 0:
-        break;
-        
-        case 1:
-        break;
-        
-        case 2:
-        break;
-        
-        case 3:
-        break;
-        
-        case 4:
-        break;
-        
-        case 5:
-        break;
-        
-        default:
-    
-        break;
-    }
-    
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_enum_update(DPID_COUNTDOWN_SET, countdown_set);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -549,62 +323,8 @@ static unsigned char dp_download_temp_unit_convert_handle(const unsigned char va
         break;
     }
     
-    //处理完DP数据后应有反馈
+    //There should be a report after processing the DP
     ret = mcu_dp_enum_update(DPID_TEMP_UNIT_CONVERT, temp_unit_convert);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_temp_set_handle
-功能描述 : 针对DPID_TEMP_SET的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_temp_set_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为VALUE
-    unsigned char ret;
-    unsigned long temp_set;
-    
-    temp_set = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
-    
-    */
-    
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_TEMP_SET,temp_set);
-    if(ret == SUCCESS)
-        return SUCCESS;
-    else
-        return ERROR;
-}
-/*****************************************************************************
-函数名称 : dp_download_temp_set_f_handle
-功能描述 : 针对DPID_TEMP_SET_F的处理函数
-输入参数 : value:数据源数据
-        : length:数据长度
-返回参数 : 成功返回:SUCCESS/失败返回:ERROR
-使用说明 : 可下发可上报类型,需要在处理完数据后上报处理结果至app
-*****************************************************************************/
-static unsigned char dp_download_temp_set_f_handle(const unsigned char value[], unsigned short length)
-{
-    //示例:当前DP类型为VALUE
-    unsigned char ret;
-    unsigned long temp_set_f;
-    
-    temp_set_f = mcu_get_dp_download_value(value,length);
-    /*
-    //VALUE类型数据处理
-    
-    */
-    
-    //处理完DP数据后应有反馈
-    ret = mcu_dp_value_update(DPID_TEMP_SET_F,temp_set_f);
     if(ret == SUCCESS)
         return SUCCESS;
     else
@@ -654,41 +374,9 @@ unsigned char dp_download_handle(unsigned char dpid,const unsigned char value[],
             //负离子处理函数
             ret = dp_download_anion_handle(value,length);
         break;
-        case DPID_CHILD_LOCK:
-            //童锁处理函数
-            ret = dp_download_child_lock_handle(value,length);
-        break;
-        case DPID_LIGHT:
-            //灯光处理函数
-            ret = dp_download_light_handle(value,length);
-        break;
-        case DPID_UV:
-            //UV杀菌处理函数
-            ret = dp_download_uv_handle(value,length);
-        break;
-        case DPID_WET:
-            //加湿处理函数
-            ret = dp_download_wet_handle(value,length);
-        break;
-        case DPID_FILTER_RESET:
-            //滤芯复位处理函数
-            ret = dp_download_filter_reset_handle(value,length);
-        break;
-        case DPID_COUNTDOWN_SET:
-            //倒计时处理函数
-            ret = dp_download_countdown_set_handle(value,length);
-        break;
         case DPID_TEMP_UNIT_CONVERT:
             //温标切换处理函数
             ret = dp_download_temp_unit_convert_handle(value,length);
-        break;
-        case DPID_TEMP_SET:
-            //温度设置处理函数
-            ret = dp_download_temp_set_handle(value,length);
-        break;
-        case DPID_TEMP_SET_F:
-            //目标温度_F处理函数
-            ret = dp_download_temp_set_f_handle(value,length);
         break;
 
         
@@ -825,7 +513,8 @@ void mcu_write_rtctime(unsigned char time[])
  */
 void wifi_test_result(unsigned char result,unsigned char rssi)
 {
-    #error "请自行实现wifi功能测试成功/失败代码,完成后请删除该行"
+   // #error "请自行实现wifi功能测试成功/失败代码,完成后请删除该行"
+   // TODO:check
     if(result == 0) {
         //测试失败
         if(rssi == 0x00) {

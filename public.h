@@ -45,6 +45,7 @@ typedef struct {
   unsigned char  switcher;  //开关
   unsigned long  pm25; //PM2.5
   unsigned char  mode; //当前模式
+  unsigned char  fun_speed; //当前模式
   unsigned char  anion ; //当前负离子
   unsigned long  temp_indoor;//温度
   unsigned long  humidity_indoor;//湿度
