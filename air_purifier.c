@@ -23,11 +23,15 @@
 //*********************************************************
 #include	"SYSCFG.h";
 #include 	"FT64F0AX.h";
+#include 	"public.h";
+
 //*********************************************************
 //***********************宏定义*****************************
 #define		uchar		unsigned char
-#define		uint			unsigned int
+#define		uint		unsigned int
 #define		ulong		unsigned long
+
+AIR_PURIFIER air_purif;
 
 #define		DemoPortOut	RB3
 #define		DemoPortIn		RC1
@@ -187,8 +191,9 @@ void main(void)
 {
     POWER_INITIAL();		//系统初始化
     UART_INITIAL();
+    wifi_protocol_init();
     DelayMs(100);
-    
+
     if(UR1TXEF)						//上电发送10+1个数据
     {
         UR1DATAL=0XAA;
@@ -196,6 +201,7 @@ void main(void)
     
     while(1)
     {
+    	wifi_uart_service();
         NOP();
     }
 }
