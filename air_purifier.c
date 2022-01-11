@@ -1,9 +1,9 @@
 //********************************************************* 
-/* ÎÄ¼þÃû£ºTEST_64F0Ax_UART.c
-*	¹¦ÄÜ£º   FT64F0Ax_UART¹¦ÄÜÑÝÊ¾
+/* æ–‡ä»¶åï¼šTEST_64F0Ax_UART.c
+*	åŠŸèƒ½ï¼š   FT64F0Ax_UARTåŠŸèƒ½æ¼”ç¤º
 *  IC:   	 FT64F0Ax     TSSOP20
-*  ÄÚ²¿£º   16M	                              
-*	ËµÃ÷£º 	 ´®¿ÚÉÏµç·¢ËÍ10¸ö×Ö·û£¬È»ºóµÈ´ý½ÓÊÕ10¸ö×Ö½ÚÊý¾Ý£¨Í¨¹ý´®¿ÚÖúÊÖ·¢ËÍ½ÓÊÕ£©
+*  å†…éƒ¨ï¼š   16M	                              
+*	è¯´æ˜Žï¼š 	 ä¸²å£ä¸Šç”µå‘é€10ä¸ªå­—ç¬¦ï¼Œç„¶åŽç­‰å¾…æŽ¥æ”¶10ä¸ªå­—èŠ‚æ•°æ®ï¼ˆé€šè¿‡ä¸²å£åŠ©æ‰‹å‘é€æŽ¥æ”¶ï¼‰
 * 
 *
 *                FT64F0AX  TSSOP20
@@ -26,7 +26,7 @@
 #include 	"public.h";
 
 //*********************************************************
-//***********************ºê¶¨Òå*****************************
+//***********************å®å®šä¹‰*****************************
 #define		uchar		unsigned char
 #define		uint		unsigned int
 #define		ulong		unsigned long
@@ -43,17 +43,18 @@ volatile	uchar		toSend[11]={0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa};
 uchar		i=0;
 uchar		mmm=0;
 /*-------------------------------------------------
- *	º¯ÊýÃû£ºinterrupt ISR
- *	¹¦ÄÜ£º 	 ½ÓÊÕÖÐ¶ÏºÍ·¢ËÍÖÐ¶Ï
- *	ÊäÈë£º	 ÎÞ
- *	Êä³ö£º 	 ÎÞ
+ *	å‡½æ•°åï¼šinterrupt ISR
+ *	åŠŸèƒ½ï¼š 	 æŽ¥æ”¶ä¸­æ–­å’Œå‘é€ä¸­æ–­
+ *	è¾“å…¥ï¼š	 æ— 
+ *	è¾“å‡ºï¼š 	 æ— 
  --------------------------------------------------*/
 void interrupt ISR(void)
 {
-    //ÖÐ¶Ï´¦Àí³ÌÐò
-    if(UR1RXNE&&UR1RXNEF)			//½ÓÊÕÖÐ¶Ï
+    //ä¸­æ–­å¤„ç†ç¨‹åº
+    if(UR1RXNE&&UR1RXNEF)			//æŽ¥æ”¶ä¸­æ–­
     {
-        receivedata[mmm++] =UR1DATAL;
+    	uart_receive_input(UR1DATAL);// TODO:
+        receivedata[mmm++] = UR1DATAL;
         
         if(mmm>=10)
         {
@@ -62,7 +63,7 @@ void interrupt ISR(void)
         NOP();
 	}
     
-	if(UR1TCEN&&UR1TCF)					//·¢ËÍÖÐ¶Ï
+	if(UR1TCEN&&UR1TCF)					//å‘é€ä¸­æ–­
     {
         UR1TCF=1;
         
@@ -78,48 +79,48 @@ void interrupt ISR(void)
     }
 }
 /*-------------------------------------------------
- *	º¯ÊýÃû£ºPOWER_INITIAL
- *	¹¦ÄÜ£º 	 ÉÏµçÏµÍ³³õÊ¼»¯
- *	ÊäÈë£º	 ÎÞ
- *	Êä³ö£º 	 ÎÞ
+ *	å‡½æ•°åï¼šPOWER_INITIAL
+ *	åŠŸèƒ½ï¼š 	 ä¸Šç”µç³»ç»Ÿåˆå§‹åŒ–
+ *	è¾“å…¥ï¼š	 æ— 
+ *	è¾“å‡ºï¼š 	 æ— 
  --------------------------------------------------*/
  void POWER_INITIAL(void)
  {
-	OSCCON=0B01110001;		//ÏµÍ³Ê±ÖÓÑ¡ÔñÎªÄÚ²¿Õñµ´Æ÷16MHz,·ÖÆµ±ÈÎª1:1
+	OSCCON=0B01110001;		//ç³»ç»Ÿæ—¶é’Ÿé€‰æ‹©ä¸ºå†…éƒ¨æŒ¯è¡å™¨16MHz,åˆ†é¢‘æ¯”ä¸º1:1
     
-	INTCON=0;							//½ûÖ¹ËùÓÐÖÐ¶Ï
+	INTCON=0;							//ç¦æ­¢æ‰€æœ‰ä¸­æ–­
     
     PORTA=0B00000000;
     PORTB=0B00000000;
     PORTC=0B00000000;
     
-	WPUA=0B00000000;			//ÈõÉÏÀ­µÄ¿ª¹Ø£¬0-¹Ø£¬1-¿ª		
+	WPUA=0B00000000;			//å¼±ä¸Šæ‹‰çš„å¼€å…³ï¼Œ0-å…³ï¼Œ1-å¼€		
 	WPUB=0B00000000;
 	WPUC=0B00000000;	
 
-	WPDA=0B00000000;			//ÈõÏÂÀ­µÄ¿ª¹Ø£¬0-¹Ø£¬1-¿ª
+	WPDA=0B00000000;			//å¼±ä¸‹æ‹‰çš„å¼€å…³ï¼Œ0-å…³ï¼Œ1-å¼€
 	WPDB=0B00000000;
 	WPDC=0B00000000;
 	
-	TRISA=0B11111111;			//ÊäÈëÊä³öÉèÖÃ£¬0-Êä³ö£¬1-ÊäÈë
+	TRISA=0B11111111;			//è¾“å…¥è¾“å‡ºè®¾ç½®ï¼Œ0-è¾“å‡ºï¼Œ1-è¾“å…¥
 	TRISB=0B11111111;	
 	TRISC=0B00000011;
 
-	PSRC0=0B11111111;			//Ô´µçÁ÷ÉèÖÃ×î´ó
+	PSRC0=0B11111111;			//æºç”µæµè®¾ç½®æœ€å¤§
 	PSRC1=0B11111111;
 	PSRC2=0B00001111;
 
-	PSINK0=0B11111111;			//¹àµçÁ÷ÉèÖÃ×î´ó
+	PSINK0=0B11111111;			//çŒç”µæµè®¾ç½®æœ€å¤§
 	PSINK1=0B11111111;
 	PSINK2=0B00000011;
 
-	ANSELA=0B00000000;			//ÉèÖÃ¶ÔÓ¦µÄIOÎªÊý×ÖIO	
+	ANSELA=0B00000000;			//è®¾ç½®å¯¹åº”çš„IOä¸ºæ•°å­—IO	
  }
  /*-------------------------------------------------
- *	º¯ÊýÃû£º	DelayUs
- *	¹¦ÄÜ£º 	 	¶ÌÑÓÊ±º¯Êý
- *	ÊäÈë²ÎÊý£ºTimeÑÓÊ±Ê±¼ä³¤¶È ÑÓÊ±Ê±³¤Time Us
- *	·µ»Ø²ÎÊý£º ÎÞ
+ *	å‡½æ•°åï¼š	DelayUs
+ *	åŠŸèƒ½ï¼š 	 	çŸ­å»¶æ—¶å‡½æ•°
+ *	è¾“å…¥å‚æ•°ï¼šTimeå»¶æ—¶æ—¶é—´é•¿åº¦ å»¶æ—¶æ—¶é•¿Time Us
+ *	è¿”å›žå‚æ•°ï¼š æ— 
  --------------------------------------------------*/
  void DelayUs(uchar Time)
  {
@@ -130,10 +131,10 @@ void interrupt ISR(void)
 	 } 
 }
  /*-------------------------------------------------
- *	º¯ÊýÃû£º	DelayMs
- *	¹¦ÄÜ£º 	 	¶ÌÑÓÊ±º¯Êý
- *	ÊäÈë²ÎÊý£ºTimeÑÓÊ±Ê±¼ä³¤¶È ÑÓÊ±Ê±³¤Time ms
- *	·µ»Ø²ÎÊý£º ÎÞ
+ *	å‡½æ•°åï¼š	DelayMs
+ *	åŠŸèƒ½ï¼š 	 	çŸ­å»¶æ—¶å‡½æ•°
+ *	è¾“å…¥å‚æ•°ï¼šTimeå»¶æ—¶æ—¶é—´é•¿åº¦ å»¶æ—¶æ—¶é•¿Time ms
+ *	è¿”å›žå‚æ•°ï¼š æ— 
  --------------------------------------------------*/
  void DelayMs(uchar Time)
  {
@@ -147,10 +148,10 @@ void interrupt ISR(void)
      }
  }
  /*-------------------------------------------------
- *	º¯ÊýÃû£º	DelayS
- *	¹¦ÄÜ£º 	 	¶ÌÑÓÊ±º¯Êý
- *	ÊäÈë²ÎÊý£ºTimeÑÓÊ±Ê±¼ä³¤¶È ÑÓÊ±Ê±³¤Time S
- *	·µ»Ø²ÎÊý£º ÎÞ
+ *	å‡½æ•°åï¼š	DelayS
+ *	åŠŸèƒ½ï¼š 	 	çŸ­å»¶æ—¶å‡½æ•°
+ *	è¾“å…¥å‚æ•°ï¼šTimeå»¶æ—¶æ—¶é—´é•¿åº¦ å»¶æ—¶æ—¶é•¿Time S
+ *	è¿”å›žå‚æ•°ï¼š æ— 
  --------------------------------------------------*/
  void DelayS(uchar Time)
  {
@@ -164,37 +165,37 @@ void interrupt ISR(void)
      }
  }
  /*-------------------------------------------------
- *	º¯ÊýÃû£ºUART_INITIAL
- *	¹¦ÄÜ£º 	 ³õÊ¼»¯´®¿Ú
- *	ÊäÈë£º	 ÎÞ
- *	Êä³ö£º 	 ÎÞ
+ *	å‡½æ•°åï¼šUART_INITIAL
+ *	åŠŸèƒ½ï¼š 	 åˆå§‹åŒ–ä¸²å£
+ *	è¾“å…¥ï¼š	 æ— 
+ *	è¾“å‡ºï¼š 	 æ— 
  --------------------------------------------------*/
  void UART_INITIAL(void)
  {
-    PCKEN|=0B00100000;			//Ê¹ÄÜUART1Ä£¿éÊ±ÖÓ
-    UR1IER=0B00100001;			//Ê¹ÄÜ·¢ËÍÍê³ÉÖÐ¶Ï£¬Ê¹ÄÜ½ÓÊÕÊý¾ÝÖÐ¶Ï
-    UR1LCR=0B00000001;		//8Î»Êý¾Ý³¤¶È£¬1Î»Í£Ö¹Î»£¬ÎÞÆæÅ¼Ð£ÑéÎ»
-    UR1MCR=0B00011000	;		//Ê¹ÄÜ·¢ËÍºÍ½ÓÊÕ½Ó¿Ú
+    PCKEN|=0B00100000;			//ä½¿èƒ½UART1æ¨¡å—æ—¶é’Ÿ
+    UR1IER=0B00100001;			//ä½¿èƒ½å‘é€å®Œæˆä¸­æ–­ï¼Œä½¿èƒ½æŽ¥æ”¶æ•°æ®ä¸­æ–­
+    UR1LCR=0B00000001;		//8ä½æ•°æ®é•¿åº¦ï¼Œ1ä½åœæ­¢ä½ï¼Œæ— å¥‡å¶æ ¡éªŒä½
+    UR1MCR=0B00011000	;		//ä½¿èƒ½å‘é€å’ŒæŽ¥æ”¶æŽ¥å£
        
-    UR1DLL=104;						//²¨ÌØÂÊ=Fmaster/(16*{URxDLH,URxDLL})=9600
+    UR1DLL=104;						//æ³¢ç‰¹çŽ‡=Fmaster/(16*{URxDLH,URxDLL})=9600
     UR1DLH=0;  
     UR1TCF=1;
     INTCON=0B11000000;
  }
 /*-------------------------------------------------
- *	º¯ÊýÃû£ºmain
- *	¹¦ÄÜ£º	 Ö÷º¯Êý 
- *	ÊäÈë£º	 ÎÞ
- *	Êä³ö£º 	 ÎÞ
+ *	å‡½æ•°åï¼šmain
+ *	åŠŸèƒ½ï¼š	 ä¸»å‡½æ•° 
+ *	è¾“å…¥ï¼š	 æ— 
+ *	è¾“å‡ºï¼š 	 æ— 
  --------------------------------------------------*/
 void main(void)
 {
-    POWER_INITIAL();		//ÏµÍ³³õÊ¼»¯
+    POWER_INITIAL();		//ç³»ç»Ÿåˆå§‹åŒ–
     UART_INITIAL();
     wifi_protocol_init();
     DelayMs(100);
 
-    if(UR1TXEF)						//ÉÏµç·¢ËÍ10+1¸öÊý¾Ý
+    if(UR1TXEF)						//ä¸Šç”µå‘é€10+1ä¸ªæ•°æ®
     {
         UR1DATAL=0XAA;
     }
