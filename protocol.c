@@ -27,7 +27,7 @@
 2:程序正常初始化完成后,建议不进行关串口中断,如必须关中断,关中断时间必须短,关中断会引起串口数据包丢失
 3:请勿在中断/定时器中断内调用上报函数
 ******************************************************************************/
-#include "public.h"
+
 #include "wifi.h"
 
 #ifdef WEATHER_ENABLE
@@ -103,8 +103,8 @@ const DOWNLOAD_CMD_S download_cmd[] =
  */
 void uart_transmit_output(unsigned char value)
 {
-   // #error "请将MCU串口发送函数填入该函数,并删除该行"
-		send_a_byte(value);
+//    #error "请将MCU串口发送函数填入该函数,并删除该行"
+    // TODO:
 /*
     //Example:
     extern void Uart_PutChar(unsigned char value);
@@ -139,17 +139,21 @@ void uart_transmit_output(unsigned char value)
 void all_data_update(void)
 {
    // #error "请在此处理可下发可上报数据及只上报数据示例,处理完成后删除该行"
+   // TODO:
+    /*
     //此代码为平台自动生成，请按照实际数据修改每个可下发可上报函数和只上报函数
-    mcu_dp_bool_update(DPID_SWITCH,air_purif.switcher); //BOOL型数据上报;
-    mcu_dp_value_update(DPID_PM25, air_purif.pm25); //VALUE型数据上报;
-    mcu_dp_enum_update(DPID_MODE,air_purif.mode); //枚举型数据上报;
-    mcu_dp_enum_update(DPID_FAN_SPEED_ENUM,air_purif.fun_speed); //枚举型数据上报;
-    mcu_dp_bool_update(DPID_ANION,air_purif.anion); //BOOL型数据上报;
-    mcu_dp_value_update(DPID_TEMP_INDOOR,air_purif.temp_indoor); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_HUMIDITY,air_purif.humidity_indoor); //VALUE型数据上报;
-    mcu_dp_value_update(DPID_TVOC, air_purif.tovc_indoor); //VALUE型数据上报;
-    mcu_dp_enum_update(DPID_AIR_QUALITY,air_purif.air_quality); //枚举型数据上报;
-    mcu_dp_enum_update(DPID_TEMP_UNIT_CONVERT,air_purif.unit_convert); //枚举型数据上报;
+    mcu_dp_bool_update(DPID_SWITCH,当前开关); //BOOL型数据上报;
+    mcu_dp_value_update(DPID_PM25,当前PM2.5); //VALUE型数据上报;
+    mcu_dp_enum_update(DPID_MODE,当前模式); //枚举型数据上报;
+    mcu_dp_enum_update(DPID_FAN_SPEED_ENUM,当前风速); //枚举型数据上报;
+    mcu_dp_bool_update(DPID_ANION,当前负离子); //BOOL型数据上报;
+    mcu_dp_value_update(DPID_TEMP_INDOOR,当前室内温度); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_HUMIDITY,当前室内湿度); //VALUE型数据上报;
+    mcu_dp_value_update(DPID_TVOC,当前TVOC); //VALUE型数据上报;
+    mcu_dp_enum_update(DPID_AIR_QUALITY,当前空气质量); //枚举型数据上报;
+    mcu_dp_enum_update(DPID_TEMP_UNIT_CONVERT,当前温标切换); //枚举型数据上报;
+
+    */
 }
 
 
@@ -170,17 +174,17 @@ static unsigned char dp_download_switch_handle(const unsigned char value[], unsi
 {
     //示例:当前DP类型为BOOL
     unsigned char ret;
-    //0:关/1:开
+    //0:off/1:on
     unsigned char switch_1;
     
     switch_1 = mcu_get_dp_download_bool(value,length);
     if(switch_1 == 0) {
-        //开关关
+        //bool off
     }else {
-        //开关开
+        //bool on
     }
   
-    //处理完DP数据后应有反馈
+    //There should be a report after processing the DP
     ret = mcu_dp_bool_update(DPID_SWITCH,switch_1);
     if(ret == SUCCESS)
         return SUCCESS;
@@ -220,7 +224,7 @@ static unsigned char dp_download_mode_handle(const unsigned char value[], unsign
         break;
     }
     
-    //处理完DP数据后应有反馈
+    //There should be a report after processing the DP
     ret = mcu_dp_enum_update(DPID_MODE, mode);
     if(ret == SUCCESS)
         return SUCCESS;
@@ -260,7 +264,7 @@ static unsigned char dp_download_fan_speed_enum_handle(const unsigned char value
         break;
     }
     
-    //处理完DP数据后应有反馈
+    //There should be a report after processing the DP
     ret = mcu_dp_enum_update(DPID_FAN_SPEED_ENUM, fan_speed_enum);
     if(ret == SUCCESS)
         return SUCCESS;
