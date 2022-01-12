@@ -18,8 +18,7 @@
 #define 	UART_RX		RA6//PA6  //PA6 used for IO UART RX
 #define		DELAY_104US	100	 //baud 9600 0.104ms
 
-#define		T2_RELOAD_VALUE_H	0x03
-#define		T2_RELOAD_VALUE_L	0x38
+#define		T4_RELOAD_VALUE	205
 
 #define		DEBUG_IO_PB5		PB5
 

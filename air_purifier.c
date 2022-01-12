@@ -49,15 +49,20 @@ uchar		mmm=0;
 void interrupt ISR(void)
 {
 
+    //定时器4的中断处理程序
+    if(T4UIE&&T4UIF)			
+    {
+        T4UIF=1;											//写1清零标志位
+        DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
+    }
+
+
+
 	if(EPIF0&0X08)					
     {
         EPIF0|=0X08;				//写1清零标志位
-        DEBUG_IO_PB5 = 1;
-        NOP();
-        NOP();
-        NOP();
-        NOP();
-        DEBUG_IO_PB5 = 0;
+       // DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
+
     }
 	#if 0
     //中断处理程序
@@ -114,7 +119,7 @@ void interrupt ISR(void)
 	WPDC=0B00000000;
 	
 	TRISA=0B11011111;			//输入输出设置，0-输出，1-输入 PA5 out PA6 input
-	TRISB=0B11111111;			
+	TRISB=0B11011111;			//PB5 输出
 	TRISC=0B00000011;
 
 	PSRC0=0B11111111;			//源电流设置最大
@@ -210,6 +215,26 @@ void interrupt ISR(void)
      INTCON=0B11000000;		//使能总中断和外设中断
  }
 
+ /*-------------------------------------------------
+ *	函数名：TIM4_INITIAL
+ *	功能： 	 初始化TIM4
+ *	输入：	 无
+ *	输出： 	 无
+ --------------------------------------------------*/
+ void TIM4_INITIAL(void)
+ {
+    PCKEN|=0B00001000;			//使能TIMER4模块时钟
+    TIM4CR1=0B00000101;			//允许自动装载，使能计数器
+    TIM4IER=0B00000001;			//允许更新中断
+    TIM4SR=0B00000000;	
+    TIM4EGR=0B00000000;	
+    TIM4CNTR=0;  
+    TIM4PSCR=0B00000011;		//预分频器的值 //4分频
+    TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
+    INTCON|=0B11000000;		//开总中断和外设中断
+ }
+
+
 /*-------------------------------------------------
  *	函数名：main
  *	功能：	 主函数 
@@ -220,7 +245,11 @@ void main(void)
 {
     POWER_INITIAL();		//系统初始化
   //  UART_INITIAL();
+  	TIM4_INITIAL();
+  	//IO_INT_INITIAL();
+ 
    // wifi_protocol_init();
+   
     DelayMs(100);
   	UART_TX =   1;
 
