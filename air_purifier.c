@@ -102,8 +102,8 @@ void interrupt ISR(void)
 	WPDB=0B00000000;
 	WPDC=0B00000000;
 	
-	TRISA=0B11111111;			//输入输出设置，0-输出，1-输入
-	TRISB=0B11111111;	
+	TRISA=0B11011111;			//输入输出设置，0-输出，1-输入 PA5 out PA6 input
+	TRISB=0B11111111;			
 	TRISC=0B00000011;
 
 	PSRC0=0B11111111;			//源电流设置最大
@@ -182,6 +182,7 @@ void interrupt ISR(void)
     UR1TCF=1;
     INTCON=0B11000000;
  }
+
 /*-------------------------------------------------
  *	函数名：main
  *	功能：	 主函数 
@@ -191,18 +192,22 @@ void interrupt ISR(void)
 void main(void)
 {
     POWER_INITIAL();		//系统初始化
-    UART_INITIAL();
-    wifi_protocol_init();
+  //  UART_INITIAL();
+   // wifi_protocol_init();
     DelayMs(100);
+  	UART_TX =   1;
 
+	#if 0
     if(UR1TXEF)						//上电发送10+1个数据
     {
         UR1DATAL=0XAA;
     }
-    
+    #endif
     while(1)
     {
-    	wifi_uart_service();
-        NOP();
+    	//wifi_uart_service();
+    	DelayMs(100);
+    	send_a_byte(0xA5);
+		DelayMs(100);
     }
 }

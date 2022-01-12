@@ -11,13 +11,12 @@
 #define 	unint       unsigned int
 #define  	unlong 		unsigned long
 
-#define		CONFIG_RX_USE_T0	0
 #define		CONFIG_RX_USE_T2	1
 
 
-#define 	UART_TX		PB2  //PB2 used for IO UART TX
-#define 	UART_RX		PA1  //PA1 used for IO UART RX
-#define		DELAY_104US	80	 //baud 9600 0.104ms
+#define 	UART_TX		RA5//PA5  //PA5 used for IO UART TX
+#define 	UART_RX		RA6//PA6  //PA6 used for IO UART RX
+#define		DELAY_104US	100	 //baud 9600 0.104ms
 
 #define		T2_RELOAD_VALUE_H	0x03
 #define		T2_RELOAD_VALUE_L	0x38
@@ -55,7 +54,7 @@ typedef struct {
 
 extern AIR_PURIFIER air_purif;
 
-extern void PA1_Level_Change_INITIAL(void);
+extern void PA6_Level_Change_INITIAL(void);
 extern void DelayUs(unsigned char Time);
 extern void send_a_byte(unchar input);
 extern void TIMER2_INITIAL (void);
