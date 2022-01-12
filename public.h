@@ -21,6 +21,8 @@
 #define		T4_RELOAD_VALUE	205
 
 #define		DEBUG_IO_PB5		PB5
+#define		DEBUG_IO_PA1		PA1
+
 
 enum{
 	COM_START_BIT = 0, //ֹͣλ
@@ -55,10 +57,8 @@ typedef struct {
 
 extern AIR_PURIFIER air_purif;
 
-extern void PA6_Level_Change_INITIAL(void);
 extern void DelayUs(unsigned char Time);
 extern void send_a_byte(unchar input);
-extern void TIMER2_INITIAL (void);
 
 
 

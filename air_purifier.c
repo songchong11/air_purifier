@@ -33,13 +33,11 @@
 
 AIR_PURIFIER air_purif;
 
+unchar ReadAPin;
+unchar recvStat;
+unchar recvData = 0;
 
-volatile	uchar		receivedata[10]=0;
-volatile	uchar		senddata=0;
 
-volatile	uchar		toSend[11]={0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0x99,0xaa};
-uchar		i=0;
-uchar		mmm=0;
 /*-------------------------------------------------
  *	函数名：interrupt ISR
  *	功能： 	 接收中断和发送中断
@@ -52,17 +50,64 @@ void interrupt ISR(void)
     //定时器4的中断处理程序
     if(T4UIE&&T4UIF)			
     {
-        T4UIF=1;											//写1清零标志位
+        T4UIF=1;							//写1清零标志位
         DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
+		
+		/*****Receive byte******/
+		recvStat++; //改变状态机
+		if(recvStat == COM_STOP_BIT) //收到停止位
+		{
+			// rx_buff[rx_cnt++] = recvData;
+			 uart_receive_input(recvData);
+			 T4UIE = 0;	//关定时器2 
+
+			 EPIF0|=0X08;				//写1清零标志位
+			 EPIE0=0B01000000;		//禁止中断6
+			 //BIT_SET(EPIE0, 6);		//开启外部中断PA6
+			 ReadAPin = PORTA;		 //清PA电平变化中断 must
+			 DEBUG_IO_PA1 = 1;//debug
+			 return; //并返回
+		}
+		
+		if(UART_RX) //'1'
+		{
+			recvData |= (1 << (recvStat - 1));
+			DEBUG_IO_PA1 = 1;
+		}
+		else //'0'
+		{
+			recvData &= ~(1 <<(recvStat - 1));
+			DEBUG_IO_PA1 = 0;
+		}
     }
 
 
 
 	if(EPIF0&0X08)					
     {
-        EPIF0|=0X08;				//写1清零标志位
-       // DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
+       EPIE0=0B00000000;		//禁止中断6
 
+       EPIF0|=0X08;				//写1清零标志位
+       // DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
+	   ReadAPin = PORTA;
+
+	   if (!(PORTA	& BIT(6))) 
+	   {
+
+		   if(!UART_RX) //检测引脚高低电平，如果是低电平，则说明检测到下升沿
+		   {
+			   if(recvStat == COM_STOP_BIT) //状态为停止位
+			   {
+				   recvData = 0;
+				   recvStat = COM_START_BIT; //接收到开始位
+				   TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
+				   T4UIF =1; //清T4标志
+				   T4UIE = 1;//开启T4中断
+				   DEBUG_IO_PA1 = 0; //debug
+			   }
+			  //EPIF0|=0X08;				//写1清PA6标志位
+		   }	  
+	   }
     }
 	#if 0
     //中断处理程序
@@ -118,7 +163,7 @@ void interrupt ISR(void)
 	WPDB=0B00000000;
 	WPDC=0B00000000;
 	
-	TRISA=0B11011111;			//输入输出设置，0-输出，1-输入 PA5 out PA6 input
+	TRISA=0B11011101;			//输入输出设置，0-输出，1-输入:             PA1 out PA5 out PA6 input
 	TRISB=0B11011111;			//PB5 输出
 	TRISC=0B00000011;
 
@@ -231,6 +276,7 @@ void interrupt ISR(void)
     TIM4CNTR=0;  
     TIM4PSCR=0B00000011;		//预分频器的值 //4分频
     TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
+    //T4UIE = 0;
     INTCON|=0B11000000;		//开总中断和外设中断
  }
 
@@ -244,19 +290,19 @@ void interrupt ISR(void)
 void main(void)
 {
     POWER_INITIAL();		//系统初始化
-  //  UART_INITIAL();
+    DelayMs(100);
   	TIM4_INITIAL();
-  	//IO_INT_INITIAL();
+	IO_INT_INITIAL();
  
    // wifi_protocol_init();
-   
-    DelayMs(100);
   	UART_TX =   1;
 
+	DEBUG_IO_PA1 = 1;
 
     while(1)
     {
     	//wifi_uart_service();
+    	NOP();
     	#if 0
     	DelayMs(100);
     	send_a_byte(0xA5);
