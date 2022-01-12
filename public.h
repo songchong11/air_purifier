@@ -21,6 +21,8 @@
 #define		T2_RELOAD_VALUE_H	0x03
 #define		T2_RELOAD_VALUE_L	0x38
 
+#define		DEBUG_IO_PB5		PB5
+
 enum{
 	COM_START_BIT = 0, //ֹͣλ
 	COM_D0_BIT, //bit0

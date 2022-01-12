@@ -33,8 +33,6 @@
 
 AIR_PURIFIER air_purif;
 
-#define		DemoPortOut	RB3
-#define		DemoPortIn		RC1
 
 volatile	uchar		receivedata[10]=0;
 volatile	uchar		senddata=0;
@@ -50,6 +48,18 @@ uchar		mmm=0;
  --------------------------------------------------*/
 void interrupt ISR(void)
 {
+
+	if(EPIF0&0X08)					
+    {
+        EPIF0|=0X08;				//写1清零标志位
+        DEBUG_IO_PB5 = 1;
+        NOP();
+        NOP();
+        NOP();
+        NOP();
+        DEBUG_IO_PB5 = 0;
+    }
+	#if 0
     //中断处理程序
     if(UR1RXNE&&UR1RXNEF)			//接收中断
     {
@@ -77,6 +87,7 @@ void interrupt ISR(void)
 		}
         NOP();
     }
+	#endif
 }
 /*-------------------------------------------------
  *	函数名：POWER_INITIAL
@@ -183,6 +194,22 @@ void interrupt ISR(void)
     INTCON=0B11000000;
  }
 
+ /*-------------------------------------------------
+ *	函数名：IO_INT_INITIAL
+ *	功能：	 IO中断初始化 
+ *	输入：	 无
+ *	输出： 	 无
+ --------------------------------------------------*/
+ void IO_INT_INITIAL(void)
+ {
+     EPS0=0B00000000;		
+     EPS1=0B00000000;		//选择PA6管脚中断
+     ITYPE0=0B00000000;		//双边沿中断
+     ITYPE1=0B00100000;
+     EPIE0=0B01000000;		//使能中断6
+     INTCON=0B11000000;		//使能总中断和外设中断
+ }
+
 /*-------------------------------------------------
  *	函数名：main
  *	功能：	 主函数 
@@ -197,17 +224,21 @@ void main(void)
     DelayMs(100);
   	UART_TX =   1;
 
-	#if 0
-    if(UR1TXEF)						//上电发送10+1个数据
-    {
-        UR1DATAL=0XAA;
-    }
-    #endif
+
     while(1)
     {
     	//wifi_uart_service();
+    	#if 0
     	DelayMs(100);
     	send_a_byte(0xA5);
+    	send_a_byte(0xA7);
+    	send_a_byte(0xb5);
+    	send_a_byte(0xc9);
 		DelayMs(100);
+    	send_a_byte(0x14);
+    	send_a_byte(0x7a);
+    	send_a_byte(0x1d);
+    	send_a_byte(0x94);
+		#endif
     }
 }
