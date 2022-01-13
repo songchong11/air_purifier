@@ -34,7 +34,6 @@
 AIR_PURIFIER air_purif;
 
 unchar ReadAPin;
-unchar recvStat;
 unchar recvData = 0;
 
 
@@ -59,9 +58,10 @@ void interrupt ISR(void)
 		{
 			// rx_buff[rx_cnt++] = recvData;
 			 uart_receive_input(recvData);
-			 T4UIE = 0;	//关定时器2 
+			 //T4UIE = 0;	//关定时器4 
+			 TIM4IER=0B00000000;
 
-			 EPIF0|=0X08;				//写1清零标志位
+			 EPIF0|=0X40;				//写1清零标志位
 			 EPIE0=0B01000000;		//禁止中断6
 			 //BIT_SET(EPIE0, 6);		//开启外部中断PA6
 			 ReadAPin = PORTA;		 //清PA电平变化中断 must
@@ -83,11 +83,11 @@ void interrupt ISR(void)
 
 
 
-	if(EPIF0&0X08)					
+	if(EPIF0&0X40)					
     {
        EPIE0=0B00000000;		//禁止中断6
 
-       EPIF0|=0X08;				//写1清零标志位
+       EPIF0|=0X40;				//写1清零6标志位
        // DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
 	   ReadAPin = PORTA;
 
@@ -102,10 +102,11 @@ void interrupt ISR(void)
 				   recvStat = COM_START_BIT; //接收到开始位
 				   TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
 				   T4UIF =1; //清T4标志
-				   T4UIE = 1;//开启T4中断
+				   //T4UIE = 1;//开启T4中断
+				   TIM4IER=0B00000001;
 				   DEBUG_IO_PA1 = 0; //debug
 			   }
-			  //EPIF0|=0X08;				//写1清PA6标志位
+			  EPIF0|=0X40;				//写1清PA6标志位
 		   }	  
 	   }
     }
@@ -225,24 +226,7 @@ void interrupt ISR(void)
          }
      }
  }
- /*-------------------------------------------------
- *	函数名：UART_INITIAL
- *	功能： 	 初始化串口
- *	输入：	 无
- *	输出： 	 无
- --------------------------------------------------*/
- void UART_INITIAL(void)
- {
-    PCKEN|=0B00100000;			//使能UART1模块时钟
-    UR1IER=0B00100001;			//使能发送完成中断，使能接收数据中断
-    UR1LCR=0B00000001;		//8位数据长度，1位停止位，无奇偶校验位
-    UR1MCR=0B00011000	;		//使能发送和接收接口
-       
-    UR1DLL=104;						//波特率=Fmaster/(16*{URxDLH,URxDLL})=9600
-    UR1DLH=0;  
-    UR1TCF=1;
-    INTCON=0B11000000;
- }
+
 
  /*-------------------------------------------------
  *	函数名：IO_INT_INITIAL
@@ -270,13 +254,12 @@ void interrupt ISR(void)
  {
     PCKEN|=0B00001000;			//使能TIMER4模块时钟
     TIM4CR1=0B00000101;			//允许自动装载，使能计数器
-    TIM4IER=0B00000001;			//允许更新中断
+    TIM4IER=0B00000001;			//不允许更新中断
     TIM4SR=0B00000000;	
     TIM4EGR=0B00000000;	
     TIM4CNTR=0;  
     TIM4PSCR=0B00000011;		//预分频器的值 //4分频
     TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
-    //T4UIE = 0;
     INTCON|=0B11000000;		//开总中断和外设中断
  }
 
@@ -290,10 +273,10 @@ void interrupt ISR(void)
 void main(void)
 {
     POWER_INITIAL();		//系统初始化
-    DelayMs(100);
   	TIM4_INITIAL();
 	IO_INT_INITIAL();
  
+    DelayMs(100);
    // wifi_protocol_init();
   	UART_TX =   1;
 

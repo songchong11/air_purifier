@@ -41,8 +41,6 @@
 #define  	unlong 		unsigned long
 
 
-unchar ReadAPin;
-
 unchar recvStat = COM_STOP_BIT; //定义接收状态机
 
 
