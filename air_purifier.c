@@ -52,6 +52,7 @@ void interrupt ISR(void)
     if(T4UIE&&T4UIF)			
     {
         T4UIF=1;							//写1清零标志位
+        DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
 
 		/*****Receive byte******/
 		recvStat++; //改变状态机
@@ -59,16 +60,13 @@ void interrupt ISR(void)
 		{
 			// rx_buff[rx_cnt++] = recvData;
 			// uart_receive_input(recvData);
-			 //T4UIE = 0;	//关定时器4 
-			 TIM4IER=0B00000000;
+			T4UIE = 0;	//关定时器4 
+			 //TIM4IER=0B00000000;
 
-			 ReadAPin = PORTA;		 //清PA电平变化中断 must
-			 EPIF0|=0X40;			//写1清零标志位
-			 EPIE0=0B01000000;		//使能中断6
 			 DEBUG_IO_PA1 = 1;//debug
 			 return; //并返回
 		}
-		
+
 		if(UART_RX) //'1'
 		{
 			recvData |= (1 << (recvStat - 1));
@@ -84,10 +82,7 @@ void interrupt ISR(void)
 
 	if(EPIF0&0X40)
     {
-		EPIF0|=0X40;			 //写1清零6标志位
 		//EPIE0=0B00000000;		//禁止中断6
-
-        DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
 
 	   if(!UART_RX) //检测引脚高低电平，如果是低电平，则说明检测到下升沿
 	   {
@@ -101,7 +96,9 @@ void interrupt ISR(void)
 			   TIM4IER=0B00000001;
 			   DEBUG_IO_PA1 = 0; //debug
 		   }
-	   }	  
+	   }
+	   
+	   EPIF0|=0X40; 			//写1清零6标志位
     }
 }
 /*-------------------------------------------------
