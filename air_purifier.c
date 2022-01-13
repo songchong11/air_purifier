@@ -35,6 +35,7 @@ AIR_PURIFIER air_purif;
 
 unchar ReadAPin;
 unchar recvData = 0;
+unchar recvStat; //定义接收状态机
 unchar cnt = 0;
 
 
@@ -47,26 +48,23 @@ unchar cnt = 0;
 void interrupt ISR(void)
 {
 
-#if 1
     //定时器4的中断处理程序
     if(T4UIE&&T4UIF)			
     {
         T4UIF=1;							//写1清零标志位
-        DEBUG_IO_PA1 = ~DEBUG_IO_PA1;		//翻转电平
-		#if 0
+
 		/*****Receive byte******/
 		recvStat++; //改变状态机
 		if(recvStat == COM_STOP_BIT) //收到停止位
 		{
 			// rx_buff[rx_cnt++] = recvData;
-			 uart_receive_input(recvData);
+			// uart_receive_input(recvData);
 			 //T4UIE = 0;	//关定时器4 
 			 TIM4IER=0B00000000;
 
 			 ReadAPin = PORTA;		 //清PA电平变化中断 must
 			 EPIF0|=0X40;			//写1清零标志位
 			 EPIE0=0B01000000;		//使能中断6
-			 //BIT_SET(EPIE0, 6);		//开启外部中断PA6
 			 DEBUG_IO_PA1 = 1;//debug
 			 return; //并返回
 		}
@@ -81,9 +79,7 @@ void interrupt ISR(void)
 			recvData &= ~(1 <<(recvStat - 1));
 			DEBUG_IO_PA1 = 0;
 		}
-		#endif
     }
-#endif
 
 
 	if(EPIF0&0X40)
@@ -92,37 +88,20 @@ void interrupt ISR(void)
 		//EPIE0=0B00000000;		//禁止中断6
 
         DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
-		cnt++;
-		if (cnt == 100) {
-			TIM4ARR= T4_RELOAD_VALUE;	 //自动装载值
-			TIM4CNTR=0;
-			TIM4IER=0B00000001;
 
-		} else if (cnt == 200){
-			TIM4IER=0B00000000;
-			cnt = 0;
-		}
-			
-
-		#if 0
-	   //if (!(PORTA	& BIT(6)))
-	   if (!BIT_IS_SET(PORTA, 6))
+	   if(!UART_RX) //检测引脚高低电平，如果是低电平，则说明检测到下升沿
 	   {
-
-		   if(!UART_RX) //检测引脚高低电平，如果是低电平，则说明检测到下升沿
+		   if(recvStat == COM_STOP_BIT) //状态为停止位
 		   {
-			   if(recvStat == COM_STOP_BIT) //状态为停止位
-			   {
-				   recvData = 0;
-				   recvStat = COM_START_BIT; //接收到开始位
-				   TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
-				   TIM4CNTR=0;
-				   TIM4IER=0B00000001;
-				   DEBUG_IO_PA1 = 0; //debug
-			   }
-		   }	  
-	   }
-	   #endif
+			   recvData = 0;
+			   recvStat = COM_START_BIT; //接收到开始位
+
+			   TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
+			   TIM4CNTR=0;
+			   TIM4IER=0B00000001;
+			   DEBUG_IO_PA1 = 0; //debug
+		   }
+	   }	  
     }
 }
 /*-------------------------------------------------
@@ -265,11 +244,12 @@ void main(void)
   	UART_TX =   1;
 
 	DEBUG_IO_PA1 = 1;
+	recvStat = COM_STOP_BIT;
 
     while(1)
     {
     	//wifi_uart_service();
-    	DelayMs(6);
+    	//DelayMs(6);
     	#if 0
     	DelayMs(100);
     	send_a_byte(0xA5);

@@ -41,18 +41,6 @@
 #define  	unlong 		unsigned long
 
 
-unchar recvStat = COM_STOP_BIT; //定义接收状态机
-
-
-/*-------------------------------------------------
- * 函数名称：   TIMER2_INITIAL
- * 功能：      初始化设置定时器2 
- * 相关寄存器： T2CON TMR2 PR2 TMR2IE TMR2IF PEIE GIE 
- -------------------------------------------------*/
-void TIMER2_INITIAL (void) 
-{    
-
-}
 
 void send_a_byte(unchar input)
 {
