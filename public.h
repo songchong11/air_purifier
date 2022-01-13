@@ -11,11 +11,9 @@
 #define 	unint       unsigned int
 #define  	unlong 		unsigned long
 
-#define		CONFIG_RX_USE_T2	1
-
 
 #define 	UART_TX		PA5//PA5  //PA5 used for IO UART TX
-#define 	UART_RX		PA6//PA6  //PA6 used for IO UART RX
+#define 	UART_RX		RA6//PA6  //PA6 used for IO UART RX
 #define		DELAY_104US	100	 //baud 9600 0.104ms
 
 #define		T4_RELOAD_VALUE	205

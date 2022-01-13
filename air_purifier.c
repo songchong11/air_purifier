@@ -61,10 +61,10 @@ void interrupt ISR(void)
 			 //T4UIE = 0;	//关定时器4 
 			 TIM4IER=0B00000000;
 
-			 EPIF0|=0X40;				//写1清零标志位
-			 EPIE0=0B01000000;		//禁止中断6
-			 //BIT_SET(EPIE0, 6);		//开启外部中断PA6
 			 ReadAPin = PORTA;		 //清PA电平变化中断 must
+			 EPIF0|=0X40;			//写1清零标志位
+			 EPIE0=0B01000000;		//使能中断6
+			 //BIT_SET(EPIE0, 6);		//开启外部中断PA6
 			 DEBUG_IO_PA1 = 1;//debug
 			 return; //并返回
 		}
@@ -83,15 +83,16 @@ void interrupt ISR(void)
 
 
 
-	if(EPIF0&0X40)					
+	if(EPIF0&0X40)
     {
-       EPIE0=0B00000000;		//禁止中断6
+    	
+		EPIF0|=0X40;			 //写1清零6标志位
+		EPIE0=0B00000000;		//禁止中断6
 
-       EPIF0|=0X40;				//写1清零6标志位
        // DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
-	   ReadAPin = PORTA;
 
-	   if (!(PORTA	& BIT(6))) 
+	   //if (!(PORTA	& BIT(6)))
+	   if (!BIT_IS_SET(PORTA, 6))
 	   {
 
 		   if(!UART_RX) //检测引脚高低电平，如果是低电平，则说明检测到下升沿
@@ -101,44 +102,13 @@ void interrupt ISR(void)
 				   recvData = 0;
 				   recvStat = COM_START_BIT; //接收到开始位
 				   TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
-				   T4UIF =1; //清T4标志
-				   //T4UIE = 1;//开启T4中断
+				   TIM4CNTR=0;
 				   TIM4IER=0B00000001;
 				   DEBUG_IO_PA1 = 0; //debug
 			   }
-			  EPIF0|=0X40;				//写1清PA6标志位
 		   }	  
 	   }
     }
-	#if 0
-    //中断处理程序
-    if(UR1RXNE&&UR1RXNEF)			//接收中断
-    {
-    	uart_receive_input(UR1DATAL);// TODO:
-        receivedata[mmm++] = UR1DATAL;
-        
-        if(mmm>=10)
-        {
-            mmm=0;
-        }
-        NOP();
-	}
-    
-	if(UR1TCEN&&UR1TCF)					//发送中断
-    {
-        UR1TCF=1;
-        
-        if(i<10)
-        {
-            UR1DATAL =toSend[i++];
-		}
-        else
-        {
-            i=0;
-		}
-        NOP();
-    }
-	#endif
 }
 /*-------------------------------------------------
  *	函数名：POWER_INITIAL
@@ -257,7 +227,7 @@ void interrupt ISR(void)
     TIM4IER=0B00000001;			//不允许更新中断
     TIM4SR=0B00000000;	
     TIM4EGR=0B00000000;	
-    TIM4CNTR=0;  
+    TIM4CNTR=0;
     TIM4PSCR=0B00000011;		//预分频器的值 //4分频
     TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
     INTCON|=0B11000000;		//开总中断和外设中断
@@ -273,8 +243,8 @@ void interrupt ISR(void)
 void main(void)
 {
     POWER_INITIAL();		//系统初始化
-  	TIM4_INITIAL();
 	IO_INT_INITIAL();
+  	TIM4_INITIAL();
  
     DelayMs(100);
    // wifi_protocol_init();
