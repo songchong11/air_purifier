@@ -35,6 +35,7 @@ AIR_PURIFIER air_purif;
 
 unchar ReadAPin;
 unchar recvData = 0;
+unchar cnt = 0;
 
 
 /*-------------------------------------------------
@@ -46,12 +47,13 @@ unchar recvData = 0;
 void interrupt ISR(void)
 {
 
+#if 1
     //定时器4的中断处理程序
     if(T4UIE&&T4UIF)			
     {
         T4UIF=1;							//写1清零标志位
-        DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
-		
+        DEBUG_IO_PA1 = ~DEBUG_IO_PA1;		//翻转电平
+		#if 0
 		/*****Receive byte******/
 		recvStat++; //改变状态机
 		if(recvStat == COM_STOP_BIT) //收到停止位
@@ -79,18 +81,30 @@ void interrupt ISR(void)
 			recvData &= ~(1 <<(recvStat - 1));
 			DEBUG_IO_PA1 = 0;
 		}
+		#endif
     }
-
+#endif
 
 
 	if(EPIF0&0X40)
     {
-    	
 		EPIF0|=0X40;			 //写1清零6标志位
-		EPIE0=0B00000000;		//禁止中断6
+		//EPIE0=0B00000000;		//禁止中断6
 
-       // DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
+        DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
+		cnt++;
+		if (cnt == 100) {
+			TIM4ARR= T4_RELOAD_VALUE;	 //自动装载值
+			TIM4CNTR=0;
+			TIM4IER=0B00000001;
 
+		} else if (cnt == 200){
+			TIM4IER=0B00000000;
+			cnt = 0;
+		}
+			
+
+		#if 0
 	   //if (!(PORTA	& BIT(6)))
 	   if (!BIT_IS_SET(PORTA, 6))
 	   {
@@ -108,6 +122,7 @@ void interrupt ISR(void)
 			   }
 		   }	  
 	   }
+	   #endif
     }
 }
 /*-------------------------------------------------
@@ -224,7 +239,7 @@ void interrupt ISR(void)
  {
     PCKEN|=0B00001000;			//使能TIMER4模块时钟
     TIM4CR1=0B00000101;			//允许自动装载，使能计数器
-    TIM4IER=0B00000001;			//不允许更新中断
+    TIM4IER=0B00000000;			//不允许更新中断
     TIM4SR=0B00000000;	
     TIM4EGR=0B00000000;	
     TIM4CNTR=0;
@@ -246,7 +261,6 @@ void main(void)
 	IO_INT_INITIAL();
   	TIM4_INITIAL();
  
-    DelayMs(100);
    // wifi_protocol_init();
   	UART_TX =   1;
 
@@ -255,7 +269,7 @@ void main(void)
     while(1)
     {
     	//wifi_uart_service();
-    	NOP();
+    	DelayMs(6);
     	#if 0
     	DelayMs(100);
     	send_a_byte(0xA5);
