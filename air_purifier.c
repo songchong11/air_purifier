@@ -59,12 +59,11 @@ void interrupt ISR(void)
 		if(recvStat == COM_STOP_BIT) //收到停止位
 		{
 			// rx_buff[rx_cnt++] = recvData;
-			// uart_receive_input(recvData);
+			uart_receive_input(recvData);
 			T4UIE = 0;	//关定时器4 
-			 //TIM4IER=0B00000000;
 
-			 DEBUG_IO_PA1 = 1;//debug
-			 return; //并返回
+			DEBUG_IO_PA1 = 1;//debug
+			return; //并返回
 		}
 
 		if(UART_RX) //'1'
@@ -93,11 +92,11 @@ void interrupt ISR(void)
 
 			   TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
 			   TIM4CNTR=0;
+			   T4UIF=1;							//写1清零标志位，否则启动timer后会立马进一次中断
 			   TIM4IER=0B00000001;
 			   DEBUG_IO_PA1 = 0; //debug
 		   }
 	   }
-	   
 	   EPIF0|=0X40; 			//写1清零6标志位
     }
 }
@@ -237,27 +236,14 @@ void main(void)
 	IO_INT_INITIAL();
   	TIM4_INITIAL();
  
-   // wifi_protocol_init();
+    wifi_protocol_init();
   	UART_TX =   1;
-
 	DEBUG_IO_PA1 = 1;
 	recvStat = COM_STOP_BIT;
 
     while(1)
     {
-    	//wifi_uart_service();
-    	//DelayMs(6);
-    	#if 0
-    	DelayMs(100);
-    	send_a_byte(0xA5);
-    	send_a_byte(0xA7);
-    	send_a_byte(0xb5);
-    	send_a_byte(0xc9);
-		DelayMs(100);
-    	send_a_byte(0x14);
-    	send_a_byte(0x7a);
-    	send_a_byte(0x1d);
-    	send_a_byte(0x94);
-		#endif
+    	wifi_uart_service();
+
     }
 }
