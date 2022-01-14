@@ -37,9 +37,8 @@
 //===========================================================
 //宏定义****************************************************
 #define 	unchar     	unsigned char 
-#define 	unint         unsigned int
+#define 	unint       unsigned int
 #define  	unlong 		unsigned long
-
 
 
 void send_a_byte(unchar input)
@@ -47,7 +46,7 @@ void send_a_byte(unchar input)
 		//发送启始位
 		unchar i=8;
 
-		UART_TX =	0;
+		UART_TX = 0;
         DelayUs(DELAY_104US);
 #if 1
 		//发送8位数据位
@@ -67,17 +66,7 @@ void send_a_byte(unchar input)
 #endif
 
 }
-/*-------------------------------------------------
- *  函数名: PA1_Level_Change_INITIAL
- *	功能：  PA端口(PA1)电平变化中断初始化
- *  输入：  无
- *  输出：  无
---------------------------------------------------*/
-void PA6_Level_Change_INITIAL(void)
-{
- 
 
-}
 
 
 
