@@ -35,7 +35,7 @@ AIR_PURIFIER air_purif;
 
 #if CONFIG_HW_UART
 	uchar mmm;
-	uchar receivedata[10] = {0};
+	uchar receivedata[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0x0a};
 
 #else
 	unchar recvData = 0;
@@ -54,14 +54,13 @@ void interrupt ISR(void)
 	//中断处理程序
 	if(UR1RXNE&&UR1RXNEF)			//接收中断
 	{
-		receivedata[0] =UR1DATAL;
-		//uart_receive_input(UR1DATAL);
+		//receivedata[0] =UR1DATAL;
+		uart_receive_input(UR1DATAL);
 	}
 
 	if(UR1TCEN&&UR1TCF) 				//发送中断
 	{
 		UR1TCF=1;						//清发送中断
-
 		//UR1DATAL =toSend[i++];
 	}
 
@@ -146,7 +145,11 @@ void interrupt ISR(void)
 	WPDB=0B00000000;
 	WPDC=0B00000000;
 	
-	TRISA=0B11011101;			//输入输出设置，0-输出，1-输入:             PA1 out PA5 out PA6 input
+#if CONFIG_HW_UART
+	TRISA=0B10011101;			//输入输出设置，0-输出，1-输入:             PA1 out PA5 out PA6 input
+#else
+	TRISA=0B11011101;			//输入输出设置，0-输出，1-输入: 			PA1 out PA5 out PA6 input
+#endif
 	TRISB=0B11011111;			//PB5 输出
 	TRISC=0B00000011;
 
@@ -288,16 +291,26 @@ void main(void)
 	recvStat = COM_STOP_BIT;
  #endif
  
-    //wifi_protocol_init();
+    wifi_protocol_init();
 	DEBUG_IO_PA1 = 1;
 	DelayMs(100);
 
     while(1)
     {
-    	//wifi_uart_service();
+    	wifi_uart_service();
+        #if 0
 		if(UR1TXEF) 					//发送寄存器为空
 		{
-			UR1DATAL= 0XAA;
+			UR1DATAL= receivedata[0];
+			receivedata[0]++;
 		}
+        #endif
+
+		for (int i = 0; i < 10; i++) {
+			send_a_byte(receivedata[i]);
+			DelayMs(1);
+		}
+
+		DelayMs(100);
     }
 }
