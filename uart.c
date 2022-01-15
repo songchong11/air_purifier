@@ -47,6 +47,8 @@ void send_a_byte(unchar input)
 	if(UR1TXEF)
 	{
 		UR1DATAL = input;
+		DelayMs(1);
+		DelayUs(104);
 	}
 }
 

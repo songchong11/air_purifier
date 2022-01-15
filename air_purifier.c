@@ -62,6 +62,7 @@ void interrupt ISR(void)
 	{
 		UR1TCF=1;						//清发送中断
 		//UR1DATAL =toSend[i++];
+		//NOP();
 	}
 
 #else
@@ -298,19 +299,5 @@ void main(void)
     while(1)
     {
     	wifi_uart_service();
-        #if 0
-		if(UR1TXEF) 					//发送寄存器为空
-		{
-			UR1DATAL= receivedata[0];
-			receivedata[0]++;
-		}
-        #endif
-
-		for (int i = 0; i < 10; i++) {
-			send_a_byte(receivedata[i]);
-			DelayMs(1);
-		}
-
-		DelayMs(100);
     }
 }

@@ -58,6 +58,7 @@ extern AIR_PURIFIER air_purif;
 
 extern void DelayUs(unsigned char Time);
 extern void send_a_byte(unchar input);
+extern void DelayMs(unsigned char Time);
 
 
 
