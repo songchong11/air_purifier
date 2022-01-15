@@ -11,6 +11,7 @@
 #define 	unint       unsigned int
 #define  	unlong 		unsigned long
 
+#define		CONFIG_HW_UART	1
 
 #define 	UART_TX		PA5//PA5  //PA5 used for IO UART TX
 #define 	UART_RX		RA6//PA6  //PA6 used for IO UART RX

@@ -33,11 +33,14 @@
 
 AIR_PURIFIER air_purif;
 
-unchar ReadAPin;
-unchar recvData = 0;
-unchar recvStat; //定义接收状态机
-unchar cnt = 0;
+#if CONFIG_HW_UART
+	uchar mmm;
+	uchar receivedata[10] = {0};
 
+#else
+	unchar recvData = 0;
+	unchar recvStat; //定义接收状态机
+#endif
 
 /*-------------------------------------------------
  *	函数名：interrupt ISR
@@ -47,7 +50,22 @@ unchar cnt = 0;
  --------------------------------------------------*/
 void interrupt ISR(void)
 {
+#if CONFIG_HW_UART
+	//中断处理程序
+	if(UR1RXNE&&UR1RXNEF)			//接收中断
+	{
+		receivedata[0] =UR1DATAL;
+		//uart_receive_input(UR1DATAL);
+	}
 
+	if(UR1TCEN&&UR1TCF) 				//发送中断
+	{
+		UR1TCF=1;						//清发送中断
+
+		//UR1DATAL =toSend[i++];
+	}
+
+#else
     //定时器4的中断处理程序
     if(T4UIE&&T4UIF)			
     {
@@ -102,6 +120,7 @@ void interrupt ISR(void)
 		   }
 	   }
     }
+#endif
 }
 /*-------------------------------------------------
  *	函数名：POWER_INITIAL
@@ -139,6 +158,10 @@ void interrupt ISR(void)
 	PSINK1=0B11111111;
 	PSINK2=0B00000011;
 
+#if CONFIG_HW_UART
+	AFP0 = 0B00000000; //USART1 TX select  AFP0[7:6] 00:PA6
+	AFP1 = 0B00000000; //USART1 RX select  AFP1[7:6] 00:PA7
+#endif
 	ANSELA=0B00000000;			//设置对应的IO为数字IO	
  }
  /*-------------------------------------------------
@@ -190,7 +213,27 @@ void interrupt ISR(void)
      }
  }
 
+#if CONFIG_HW_UART
+/*-------------------------------------------------
+*  函数名：UART_INITIAL
+*  功能：	初始化串口
+*  输入：	无
+*  输出：	无
+--------------------------------------------------*/
+void UART_INITIAL(void)
+{
+   PCKEN|=0B00100000;		   //使能UART1模块时钟
+   UR1IER=0B00100001;		   //使能发送完成中断，使能接收数据中断
+   UR1LCR=0B00000001;	  	 //8位数据长度，1位停止位，无奇偶校验位
+   UR1MCR=0B00011000;	   	//使能发送和接收接口
+	  
+   UR1DLL=104;					   //波特率=Fmaster/(16*{URxDLH,URxDLL})=9600
+   UR1DLH=0;  
+   UR1TCF=1;
+   INTCON=0B11000000;
+}
 
+#else
  /*-------------------------------------------------
  *	函数名：IO_INT_INITIAL
  *	功能：	 IO中断初始化 
@@ -225,7 +268,7 @@ void interrupt ISR(void)
     TIM4ARR= T4_RELOAD_VALUE;  	//自动装载值
     INTCON|=0B11000000;		//开总中断和外设中断
  }
-
+#endif
 
 /*-------------------------------------------------
  *	函数名：main
@@ -236,17 +279,25 @@ void interrupt ISR(void)
 void main(void)
 {
     POWER_INITIAL();		//系统初始化
+#if CONFIG_HW_UART
+	UART_INITIAL();
+#else
 	IO_INT_INITIAL();
   	TIM4_INITIAL();
- 
-    wifi_protocol_init();
-  	UART_TX =   1;
-	DEBUG_IO_PA1 = 1;
+  	UART_TX =  1;
 	recvStat = COM_STOP_BIT;
+ #endif
+ 
+    //wifi_protocol_init();
+	DEBUG_IO_PA1 = 1;
+	DelayMs(100);
 
     while(1)
     {
-    	wifi_uart_service();
-
+    	//wifi_uart_service();
+		if(UR1TXEF) 					//发送寄存器为空
+		{
+			UR1DATAL= 0XAA;
+		}
     }
 }

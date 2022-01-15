@@ -40,7 +40,17 @@
 #define 	unint       unsigned int
 #define  	unlong 		unsigned long
 
+#if CONFIG_HW_UART
 
+void send_a_byte(unchar input)
+{
+	if(UR1TXEF)
+	{
+		UR1DATAL = input;
+	}
+}
+
+#else
 void send_a_byte(unchar input)
 {
 		//发送启始位
@@ -48,7 +58,7 @@ void send_a_byte(unchar input)
 
 		UART_TX = 0;
         DelayUs(DELAY_104US);
-#if 1
+
 		//发送8位数据位
 		while(i--)
 		{
@@ -63,10 +73,9 @@ void send_a_byte(unchar input)
 		//发送结束位
 		UART_TX= 1;
 		DelayUs(DELAY_104US);;
-#endif
 
 }
-
+#endif
 
 
 
