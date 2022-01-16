@@ -69,6 +69,21 @@ typedef struct {
 
 extern AIR_PURIFIER air_purif;
 
+enum{
+	DP_TYPE_START = 0,
+	DP_TYPE_SWITCH,
+	DP_TYPE_PM25,
+	DP_TYPE_MODE,
+	DP_TYPE_FAN_SPEED_ENUM,
+	DP_TYPE_ANION,
+	DP_TYPE_TEMP_INDOOR,
+	DP_TYPE_HUMIDITY,
+	DP_TYPE_TVOC,
+	DP_TYPE_AIR_QUALITY,
+	DP_TYPE_TEMP_UNIT_CONVERT,
+};
+
+
 extern void DelayUs(unsigned char Time);
 extern void send_a_byte(unchar input);
 extern void DelayMs(unsigned char Time);
