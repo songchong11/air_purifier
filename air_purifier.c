@@ -153,7 +153,7 @@ void interrupt ISR(void)
 #else
 	TRISA=0B11011101;			//输入输出设置，0-输出，1-输入: 			PA1 out PA5 out PA6 input
 #endif
-	TRISB=0B11011111;			//PB5 输出
+	TRISB=0B11011101;			// PB1 输出    PB5 输出
 	TRISC=0B00000011;
 
 	PSRC0=0B11111111;			//源电流设置最大
@@ -293,7 +293,9 @@ void main(void)
   	UART_TX =  1;
 	recvStat = COM_STOP_BIT;
  #endif
- 
+
+ 	
+ 	WIFI_EN_GPIO = 1;
     wifi_protocol_init();
 	DEBUG_IO_PA1 = 1;
 	printf("air_purifier init\n");

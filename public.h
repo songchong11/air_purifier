@@ -14,6 +14,7 @@
 #define		DEBUG_IO_PB5		PB5
 #define		DEBUG_IO_PA1		PA1
 
+#define		WIFI_EN_GPIO		PB1
 
 #define		CONFIG_HW_UART	1
 
