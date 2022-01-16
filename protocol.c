@@ -523,14 +523,21 @@ void wifi_test_result(unsigned char result,unsigned char rssi)
    // TODO:check
     if(result == 0) {
         //测试失败
+        	printf("###########wifi_test fail###########\n");
         if(rssi == 0x00) {
             //未扫描到名称为tuya_mdev_test路由器,请检查
+            printf("###########Not scaned a tuya_mdev_test router###########\n");
         }else if(rssi == 0x01) {
             //模块未授权
+             printf("###########wifi module not authorized ###########\n");
         }
     }else {
         //测试成功
         //rssi为信号强度(0-100, 0信号最差，100信号最强)
+        if (rssi >= 50)
+       		printf("########### wifi module test success ###########\n");
+		else
+			printf("########### wifi signal weak !!!###########\n");
     }
 }
 #endif

@@ -41,10 +41,10 @@
 #define CONFIG_MODE     CONFIG_MODE_SPECIAL             //防误触模式(特殊配网方式)
 
 /*  设置低功耗配网方式和特殊配网方式的配网模式打开时间,该宏处于注释状态将按三分钟处理,可以支持的设置数据范围: 3~10 分钟  */
-//#define CONFIG_MODE_DELAY_TIME    10         //配网模式打开时间 单位:分钟
+#define CONFIG_MODE_DELAY_TIME    5         //配网模式打开时间 单位:分钟
 
 /*  选择smart模式和AP模式,该宏都注释将保持smart模式和AP模式互相切换  */
-//#define CONFIG_MODE_CHOOSE        0         //模块同时支持AP连接配网和EZ配网无需用户切换,对应的配网状态0x06
+#define CONFIG_MODE_CHOOSE        0         //模块同时支持AP连接配网和EZ配网无需用户切换,对应的配网状态0x06
 //#define CONFIG_MODE_CHOOSE        1         //仅只有AP配网模式
 
 /*  启用模块的红外功能并告知模块红外的收发脚使用那些IO口，没有该字段红外能力默认关闭  */
@@ -78,8 +78,8 @@ MCU可调用mcu_api.c文件内的mcu_firm_update_query()函数获取当前MCU固
                     如当前使用MCU的RAM不够,可修改为24
 ******************************************************************************/
 #ifndef SUPPORT_MCU_FIRM_UPDATE
-#define WIFI_UART_RECV_BUF_LMT          16              //串口数据接收缓存区大小,如MCU的RAM不够,可缩小
-#define WIFI_DATA_PROCESS_LMT           24              //串口数据处理缓存区大小,根据用户DP数据大小量定,必须大于24
+#define WIFI_UART_RECV_BUF_LMT          32//16              //串口数据接收缓存区大小,如MCU的RAM不够,可缩小
+#define WIFI_DATA_PROCESS_LMT           48//24              //串口数据处理缓存区大小,根据用户DP数据大小量定,必须大于24
 #else
 #define WIFI_UART_RECV_BUF_LMT          128             //串口数据接收缓存区大小,如MCU的RAM不够,可缩小
 
@@ -90,7 +90,7 @@ MCU可调用mcu_api.c文件内的mcu_firm_update_query()函数获取当前MCU固
 
 #endif
 
-#define WIFIR_UART_SEND_BUF_LMT         48              //根据用户DP数据大小量定,必须大于48
+#define WIFIR_UART_SEND_BUF_LMT         64//48              //根据用户DP数据大小量定,必须大于48
 /******************************************************************************
                         4:定义模块工作方式
 模块自处理:
@@ -159,7 +159,6 @@ STREM_PACK_LEN为流服务传输一包的大小，目前模块串口最大可以
 并在protocol.c文件wifi_connect_test_result函数内查看测试结果,
 wifi_connect_test_result内部有#err提示,完成函数后请删除该#err
 ******************************************************************************/
-// TODO:check
 //#define         WIFI_CONNECT_TEST_ENABLE                //开启WIFI产测功能（连接指定路由）
 
 /******************************************************************************

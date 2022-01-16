@@ -303,14 +303,48 @@ void main(void)
     {
     	wifi_uart_service();
 
+		// TODO: keyscan handle
+#if 0
+		if(wifi_config_key) {
+			mcu_reset_wifi();
+			mcu_set_wifi_mode(SMART_CONFIG);
+		}
+#endif
+
+#if 1 // TODO: wifi work state indicate
+		switch(mcu_get_wifi_work_state()) {
+			case SMART_CONFIG_STATE:
+				//处 于 Smart 配 置 状 态， 即 LED 快 闪 间隔250ms
+				printf("wifi is smart config state\n");
+			break;
+
+			case AP_STATE:
+				//处 于 AP 配 置 状 态， 即 LED 慢 闪 间隔1500ms
+				printf("wifi is AP config state\n");
+			break;
+
+			case WIFI_NOT_CONNECTED:
+				//Wi-Fi 配 置 完 成， 正 在 连 接 路 由 器， 即 LED 常 暗
+				printf("wifi not connected\n");
+				
+			break;
+
+			case WIFI_CONNECTED:
+				//路 由 器 连 接 成 功， 即 LED 常 亮
+				printf("wifi connected\n");
+			break;
+
+			default:
+			break;
+		}
+#endif
+
 
 		/*****************************************************************************/
 		// TODO: check 当用户操作面板改变相关模式时或者MCU检测到传感器数据变化
 		// TODO:时，mcu需要主动上报数据，可以只单独上报变化的数据一次，也可以所有数据上报一次
 
-		#if 0
-		all_data_update();
-		#else
+		#if 1
 
 		//value_chang_type = mcu_check_status_changed();
 		value_chang_type = 0;
@@ -362,6 +396,16 @@ void main(void)
 
 	    #endif
 
+
+#ifdef WIFI_TEST_ENABLE
+		// TODO:使用不常用组合键长按2s进产测模式
+#if 0
+		if (WIFI_TEST_KEY) {
+			// TODO: 产测时需要一个名字为tuya_mdev_test的路由器距离工位5m
+			mcu_start_wifitest();
+		}
+#endif
+#endif
 		/*****************************************************************************/
 	}
 }
