@@ -11,17 +11,18 @@
 #define 	unint       unsigned int
 #define  	unlong 		unsigned long
 
-#define		CONFIG_HW_UART	1
-
-#define 	UART_TX		PA5//PA5  //PA5 used for IO UART TX
-#define 	UART_RX		RA6//PA6  //PA6 used for IO UART RX
-#define		DELAY_104US	100	 //baud 9600 0.104ms
-
-#define		T4_RELOAD_VALUE	205
-
 #define		DEBUG_IO_PB5		PB5
 #define		DEBUG_IO_PA1		PA1
 
+
+#define		CONFIG_HW_UART	1
+
+
+#if CONFIG_HW_UART
+#define 	UART_TX		PA5//PA5  //PA5 used for IO UART TX
+#define 	UART_RX		RA6//PA6  //PA6 used for IO UART RX
+#define		DELAY_104US	100	 //baud 9600 0.104ms
+#define		T4_RELOAD_VALUE	205
 
 enum{
 	COM_START_BIT = 0, //ֹͣλ
@@ -39,6 +40,18 @@ enum{
 extern unchar ReadAPin;
 extern unchar recvStat;
 extern unchar recvData;
+#else
+
+#endif
+
+#define  	PRINTF_DEBUG		1
+
+#if PRINTF_DEBUG
+#include "printf.h"
+#define 	BAUD_1M_DELAY				//baud rat is 1000000
+#define 	PRINTF_IO				DEBUG_IO_PB5  //PB5 used printf IO
+#endif
+
 
 
 typedef struct {

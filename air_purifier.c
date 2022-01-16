@@ -294,6 +294,7 @@ void main(void)
  
     wifi_protocol_init();
 	DEBUG_IO_PA1 = 1;
+	printf("air_purifier init\n");
 	DelayMs(100);
 
     while(1)

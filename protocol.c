@@ -175,9 +175,9 @@ static unsigned char dp_download_switch_handle(const unsigned char value[], unsi
     
     switch_1 = mcu_get_dp_download_bool(value,length);
     if(switch_1 == 0) {
-        //bool off
+        //bool off 请在此处调用空气净化器关机函数
     }else {
-        //bool on
+        //bool on  请在此处调用空气净化器开机函数
     }
   
     //There should be a report after processing the DP
@@ -203,7 +203,7 @@ static unsigned char dp_download_mode_handle(const unsigned char value[], unsign
     
     mode = mcu_get_dp_download_enum(value,length);
     switch(mode) {
-        case 0:
+        case 0://添加对应模式处理函数
         break;
         
         case 1:
