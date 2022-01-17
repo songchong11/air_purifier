@@ -305,16 +305,18 @@ void main(void)
     {
     	wifi_uart_service();
 
-		// TODO: keyscan handle
+		// TODO: received wifi config cmd
 #if 0
-		if(wifi_config_key) {
+		if(wifi_config_cmd) {
 			mcu_reset_wifi();
-			mcu_set_wifi_mode(SMART_CONFIG);
 		}
 #endif
 
-#if 1 // TODO: wifi work state indicate
-		switch(mcu_get_wifi_work_state()) {
+#if 0
+		// TODO: wifi work state indicate
+		air_purif.wifi_state = mcu_get_wifi_work_state();
+
+		switch(air_purif.wifi_state) {
 			case SMART_CONFIG_STATE:
 				//处 于 Smart 配 置 状 态， 即 LED 快 闪 间隔250ms
 				printf("wifi is smart config state\n");
@@ -346,63 +348,68 @@ void main(void)
 		// TODO: check 当用户操作面板改变相关模式时或者MCU检测到传感器数据变化
 		// TODO:时，mcu需要主动上报数据，可以只单独上报变化的数据一次，也可以所有数据上报一次
 
-		#if 1
+		#if 0
 
-		//value_chang_type = mcu_check_status_changed();
-		value_chang_type = 0;
+		if (air_purif.wifi_state == WIFI_CONNECTED || air_purif.wifi_state == WIFI_CONN_CLOUD) {
 
-		switch(value_chang_type) {
-			case DP_TYPE_SWITCH:
-				mcu_dp_bool_update(DPID_SWITCH,air_purif.switcher); //BOOL型数据上报;
-			break;
+			//value_chang_type = mcu_check_status_changed();
+			value_chang_type = 0;
 
-			case DP_TYPE_PM25:
-				mcu_dp_value_update(DPID_PM25, air_purif.pm25); //VALUE型数据上报;
-			break;
+			switch(value_chang_type) {
+				case DP_TYPE_SWITCH:
+					mcu_dp_bool_update(DPID_SWITCH,air_purif.switcher); //BOOL型数据上报;
+				break;
 
-			case DP_TYPE_MODE:
-				mcu_dp_enum_update(DPID_MODE,air_purif.mode); //枚举型数据上报;
-			break;
+				case DP_TYPE_PM25:
+					mcu_dp_value_update(DPID_PM25, air_purif.pm25); //VALUE型数据上报;
+				break;
 
-			case DP_TYPE_TEMP_INDOOR:
-				 mcu_dp_value_update(DPID_TEMP_INDOOR,air_purif.temp_indoor); //VALUE型数据上报;
-			break;
+				case DP_TYPE_MODE:
+					mcu_dp_enum_update(DPID_MODE,air_purif.mode); //枚举型数据上报;
+				break;
 
-			case DP_TYPE_HUMIDITY:
-				 mcu_dp_value_update(DPID_HUMIDITY,air_purif.humidity_indoor); //VALUE型数据上报;
-			break;
+				case DP_TYPE_TEMP_INDOOR:
+					 mcu_dp_value_update(DPID_TEMP_INDOOR,air_purif.temp_indoor); //VALUE型数据上报;
+				break;
 
-			case DP_TYPE_TVOC:
-				mcu_dp_value_update(DPID_TVOC, air_purif.tovc_indoor); //VALUE型数据上报;
-			break;
+				case DP_TYPE_HUMIDITY:
+					 mcu_dp_value_update(DPID_HUMIDITY,air_purif.humidity_indoor); //VALUE型数据上报;
+				break;
 
-			case DP_TYPE_ANION:
-				mcu_dp_bool_update(DPID_ANION,air_purif.anion); //BOOL型数据上报;
-			break;
+				case DP_TYPE_TVOC:
+					mcu_dp_value_update(DPID_TVOC, air_purif.tovc_indoor); //VALUE型数据上报;
+				break;
 
-			case DP_TYPE_FAN_SPEED_ENUM:
-				mcu_dp_enum_update(DPID_FAN_SPEED_ENUM,air_purif.fun_speed); //枚举型数据上报;
-			break;
+				case DP_TYPE_ANION:
+					mcu_dp_bool_update(DPID_ANION,air_purif.anion); //BOOL型数据上报;
+				break;
 
-			case DP_TYPE_AIR_QUALITY:
-				mcu_dp_enum_update(DPID_AIR_QUALITY,air_purif.air_quality); //枚举型数据上报;
-			break;
+				case DP_TYPE_FAN_SPEED_ENUM:
+					mcu_dp_enum_update(DPID_FAN_SPEED_ENUM,air_purif.fun_speed); //枚举型数据上报;
+				break;
 
-			case DP_TYPE_TEMP_UNIT_CONVERT:
-				mcu_dp_enum_update(DPID_TEMP_UNIT_CONVERT,air_purif.unit_convert); //枚举型数据上报;
-			break;
+				case DP_TYPE_AIR_QUALITY:
+					mcu_dp_enum_update(DPID_AIR_QUALITY,air_purif.air_quality); //枚举型数据上报;
+				break;
 
-			default:
-			break;
+				case DP_TYPE_TEMP_UNIT_CONVERT:
+					mcu_dp_enum_update(DPID_TEMP_UNIT_CONVERT,air_purif.unit_convert); //枚举型数据上报;
+				break;
+
+				default:
+				break;
+			}
+
 		}
+
 
 	    #endif
 
 
 #ifdef WIFI_TEST_ENABLE
-		// TODO:使用不常用组合键长按2s进产测模式
+		// TODO:使用不常用组合键长按2s进产测模式,产测命令由显示板发送过来
 #if 0
-		if (WIFI_TEST_KEY) {
+		if (wifi_product_test_cmd) {
 			// TODO: 产测时需要一个名字为tuya_mdev_test的路由器距离工位5m
 			mcu_start_wifitest();
 		}

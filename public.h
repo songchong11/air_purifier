@@ -66,6 +66,7 @@ typedef struct {
   unsigned long  tovc_indoor;//
   unsigned char  air_quality;//空气质量
   unsigned char  unit_convert;//温标切换
+  unsigned char  wifi_state;
 } AIR_PURIFIER;
 
 extern AIR_PURIFIER air_purif;

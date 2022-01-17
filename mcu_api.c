@@ -265,7 +265,7 @@ unsigned char mcu_dp_bool_update(unsigned char dpid,unsigned char value)
 unsigned char mcu_dp_value_update(unsigned char dpid,unsigned long value)
 {
     unsigned short send_len = 0;
-    
+
     if(stop_update_flag == ENABLE)
         return SUCCESS;
     
