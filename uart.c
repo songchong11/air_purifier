@@ -34,15 +34,11 @@
 
 //===========================================================
 //Variable definition
-//===========================================================
-//宏定义****************************************************
-#define 	unchar     	unsigned char 
-#define 	unint       unsigned int
-#define  	unlong 		unsigned long
+
 
 #if CONFIG_HW_UART
 
-void hw_uart_send_a_byte(unchar input)
+void hw_uart_send_a_byte(uchar input)
 {
 	if(UR1TXEF)
 	{
@@ -54,10 +50,10 @@ void hw_uart_send_a_byte(unchar input)
 #endif
 
 #if CONFIG_IO_UART
-void io_uart_send_a_byte(unchar input)
+void io_uart_send_a_byte(uchar input)
 {
 		//发送启始位
-		unchar i=8;
+		uchar i=8;
 
 		UART_TX = 0;
         DelayUs(DELAY_104US);
@@ -76,6 +72,27 @@ void io_uart_send_a_byte(unchar input)
 		//发送结束位
 		UART_TX= 1;
 		DelayUs(DELAY_104US);;
+
+}
+
+void send_data_to_display_board(uchar *data)
+{
+	uchar i;
+	uchar tmp_data[8] = {0};
+
+	tmp_data[0] = UART_CMD_START;
+	tmp_data[1] = 0x57;
+	tmp_data[2] = data[0];
+	tmp_data[3] = data[1];
+	tmp_data[4] = data[2];
+	tmp_data[5] = data[3];
+	tmp_data[6] = data[4];
+
+	for (i = 0; i < (CMD_LEN - 1); i++)
+		tmp_data[7] += tmp_data[i];
+
+	for (i = 0; i < CMD_LEN; i++)
+		io_uart_send_a_byte(tmp_data);
 
 }
 #endif

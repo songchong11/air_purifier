@@ -27,17 +27,20 @@
 
 //*********************************************************
 //***********************宏定义*****************************
-#define		uchar		unsigned char
-#define		uint		unsigned int
-#define		ulong		unsigned long
+
 
 AIR_PURIFIER air_purif;
 uchar	value_chang_type;
 
+uchar cmd_send[CMD_LEN - 3] = {0};
 
 #if CONFIG_IO_UART
-	unchar recvData = 0;
-	unchar recvStat; //定义接收状态机
+
+	uchar recvData = 0;
+	uchar recvStat; //定义接收状态机
+
+	uchar rx_buff[CMD_LEN] = {0};
+	uchar rx_cnt = 0;
 #endif
 
 /*-------------------------------------------------
@@ -73,8 +76,8 @@ void interrupt ISR(void)
 		recvStat++; //改变状态机
 		if(recvStat == COM_STOP_BIT) //收到停止位
 		{
-			// rx_buff[rx_cnt++] = recvData;
-			uart_receive_input(recvData);
+			rx_buff[rx_cnt++] = recvData;
+
 			T4UIE = 0;	//关定时器4 
 
 			EPIF0|=0X40; 			//写1清零6标志位
@@ -270,6 +273,151 @@ void UART_INITIAL(void)
  }
 #endif
 
+void reset_io_uart_data(void)
+{
+	memset(rx_buff, 0, sizeof(rx_buff));
+	rx_cnt = 0;
+}
+
+/*-------------------------------------------------
+ *	函数名：air_purifier_user_init
+ *	功能：用户数据初始化
+ *	输入：	 无
+ *	输出： 	 无
+ --------------------------------------------------*/
+
+void air_purifier_user_init()
+{
+	air_purif.switcher = 0;
+	air_purif.pm25 = 0;
+	air_purif.mode = 0;
+	air_purif.anion = 0;
+	air_purif.humidity_indoor = 0;
+	air_purif.tovc_indoor = 0;
+	air_purif.air_quality = 0;
+	air_purif.unit_convert = 0;
+	air_purif.wifi_state = 0;
+}
+
+/*-------------------------------------------------
+ *	函数名：parse_cmd_from_display_board
+ *	功能：	 解析显示板发送过来的命令
+ *	输入：	 无
+ *	输出： 	 无
+ --------------------------------------------------*/
+void parse_cmd_from_display_board(void)
+{
+	uchar sum_crc = 0;
+
+	if(rx_cnt == CMD_LEN && rx_buff[0] == UART_CMD_START && rx_buff[1] == 0x52) {
+
+		for (uchar i = 0; i < sizeof(rx_buff); i++)
+			sum_crc += rx_buff[i];
+
+		if (sum_crc != rx_buff[CMD_LEN - 1]) {
+			printf("check crc error!!!\n");
+		} else {
+
+			switch (rx_buff[2]) {
+				case CMD_TYPE_WIFI_RESET:
+					printf("mcu_reset_wifi !!!\n");
+					mcu_reset_wifi();
+				break;
+
+				case CMD_TYPE_WIFI_TEST:
+#ifdef WIFI_TEST_ENABLE
+					//产测时需要一个名字为tuya_mdev_test的路由器距离工位5m
+					printf("enter into wifi test !!!\n");
+					mcu_start_wifitest();
+#endif
+				break;
+
+				case CMD_TYPE_SEND_DATA_TO_WIFI:
+					printf("updata all data !!!\n");
+					all_data_update();
+				break;
+
+				default:
+				break;
+			}
+		}
+
+		reset_io_uart_data();
+	}
+
+}
+
+/*-------------------------------------------------
+ *	函数名：check_wifi_status
+ *	功能：	检查wifi状态，当状态改变时，将状态上报给显示板 
+ *	输入：	 无
+ *	输出： 	 无
+ --------------------------------------------------*/
+void check_wifi_status(void)
+{
+	static uchar wifi_status_now = 0x10;
+
+	air_purif.wifi_state = mcu_get_wifi_work_state();
+
+	if(wifi_status_now != air_purif.wifi_state) {
+
+		switch(air_purif.wifi_state) {
+			case SMART_CONFIG_STATE:
+				//处 于 Smart 配 置 状 态， 即 LED 快 闪 间隔250ms
+				printf("wifi is smart config state\n");
+				cmd_send[0] = CMD_TYPE_WIFI_STATUS;
+				cmd_send[1] = 0x00;
+				cmd_send[2] = 0x00;
+				cmd_send[3] = 0x00;
+				cmd_send[4] = SMART_CONFIG_STATE;
+				send_data_to_display_board(cmd_send);
+			break;
+
+			case AP_STATE:
+				//处 于 AP 配 置 状 态， 即 LED 慢 闪 间隔1500ms
+				printf("wifi is AP config state\n");
+				cmd_send[0] = CMD_TYPE_WIFI_STATUS;
+				cmd_send[1] = 0x00;
+				cmd_send[2] = 0x00;
+				cmd_send[3] = 0x00;
+				cmd_send[4] = AP_STATE;
+				send_data_to_display_board(cmd_send);
+			break;
+
+			case WIFI_NOT_CONNECTED:
+				//Wi-Fi 配 置 完 成， 正 在 连 接 路 由 器， 即 LED 常 暗
+				printf("wifi not connected\n");
+				cmd_send[0] = CMD_TYPE_WIFI_STATUS;
+				cmd_send[1] = 0x00;
+				cmd_send[2] = 0x00;
+				cmd_send[3] = 0x00;
+				cmd_send[4] = WIFI_NOT_CONNECTED;
+				send_data_to_display_board(cmd_send);
+			break;
+
+			case WIFI_CONNECTED:
+				//路 由 器 连 接 成 功， 即 LED 常 亮
+				printf("wifi connected\n");
+				cmd_send[0] = CMD_TYPE_WIFI_STATUS;
+				cmd_send[1] = 0x00;
+				cmd_send[2] = 0x00;
+				cmd_send[3] = 0x00;
+				cmd_send[4] = WIFI_CONNECTED;
+				send_data_to_display_board(cmd_send);
+			break;
+
+			default:
+			break;
+		}
+
+		wifi_status_now == air_purif.wifi_state;
+	}
+
+}
+
+
+
+
 /*-------------------------------------------------
  *	函数名：main
  *	功能：	 主函数 
@@ -295,50 +443,16 @@ void main(void)
     wifi_protocol_init();
 	DEBUG_IO_PA1 = 1;
 	printf("air_purifier init\n");
+	
 	DelayMs(100);
 
     while(1)
     {
     	wifi_uart_service();
 
-		// TODO: received wifi config cmd
-#if 0
-		if(wifi_config_cmd) {
-			mcu_reset_wifi();
-		}
-#endif
+		parse_cmd_from_display_board();
 
-#if 0
-		// TODO: wifi work state indicate
-		air_purif.wifi_state = mcu_get_wifi_work_state();
-
-		switch(air_purif.wifi_state) {
-			case SMART_CONFIG_STATE:
-				//处 于 Smart 配 置 状 态， 即 LED 快 闪 间隔250ms
-				printf("wifi is smart config state\n");
-			break;
-
-			case AP_STATE:
-				//处 于 AP 配 置 状 态， 即 LED 慢 闪 间隔1500ms
-				printf("wifi is AP config state\n");
-			break;
-
-			case WIFI_NOT_CONNECTED:
-				//Wi-Fi 配 置 完 成， 正 在 连 接 路 由 器， 即 LED 常 暗
-				printf("wifi not connected\n");
-				
-			break;
-
-			case WIFI_CONNECTED:
-				//路 由 器 连 接 成 功， 即 LED 常 亮
-				printf("wifi connected\n");
-			break;
-
-			default:
-			break;
-		}
-#endif
-
+		check_wifi_status();
 
 		/*****************************************************************************/
 		// TODO: check 当用户操作面板改变相关模式时或者MCU检测到传感器数据变化
@@ -395,22 +509,9 @@ void main(void)
 				default:
 				break;
 			}
-
 		}
-
-
 	    #endif
 
-
-#ifdef WIFI_TEST_ENABLE
-		// TODO:使用不常用组合键长按2s进产测模式,产测命令由显示板发送过来
-#if 0
-		if (wifi_product_test_cmd) {
-			// TODO: 产测时需要一个名字为tuya_mdev_test的路由器距离工位5m
-			mcu_start_wifitest();
-		}
-#endif
-#endif
 		/*****************************************************************************/
 	}
 }

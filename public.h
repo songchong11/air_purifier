@@ -7,17 +7,22 @@
 #include "mcu_api.h"
 #include "protocol.h"
 
-#define 	unchar     	unsigned char 
-#define 	unint       unsigned int
-#define  	unlong 		unsigned long
+#define		uchar		unsigned char
+#define		uint		unsigned int
+#define		ulong		unsigned long
+
 
 #define		DEBUG_IO_PA0		PA0
 #define		DEBUG_IO_PA1		PA1
 
 #define		WIFI_EN_GPIO		PB1
 
-#define		CONFIG_HW_UART	1
-#define		CONFIG_IO_UART	1
+#define		CONFIG_HW_UART		1
+#define		CONFIG_IO_UART		1
+
+#define		UART_CMD_START		0xA5
+#define 	CMD_LEN				8
+
 
 #if CONFIG_HW_UART
 #define 	UART_TX		PB5  //PB5 used for IO UART TX
@@ -38,9 +43,9 @@ enum{
 	COM_STOP_BIT, //bit8
 };
 
-extern unchar ReadAPin;
-extern unchar recvStat;
-extern unchar recvData;
+extern uchar ReadAPin;
+extern uchar recvStat;
+extern uchar recvData;
 #endif
 
 #define  	PRINTF_DEBUG		1
@@ -84,9 +89,18 @@ enum{
 };
 
 
+enum{
+	CMD_TYPE_WIFI_RESET = 0xA0,
+	CMD_TYPE_WIFI_STATUS,
+	CMD_TYPE_WIFI_TEST,
+	CMD_TYPE_WIFI_TEST_RESULT,
+	CMD_TYPE_SEND_DATA_TO_WIFI,
+};
+
 extern void DelayUs(unsigned char Time);
-extern void hw_uart_send_a_byte(unchar input);
-extern void io_uart_send_a_byte(unchar input);
+extern void hw_uart_send_a_byte(uchar input);
+extern void io_uart_send_a_byte(uchar input);
+extern void send_data_to_display_board(uchar *data);
 extern void DelayMs(unsigned char Time);
 
 
