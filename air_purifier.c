@@ -35,11 +35,7 @@ AIR_PURIFIER air_purif;
 uchar	value_chang_type;
 
 
-#if CONFIG_HW_UART
-	uchar mmm;
-	uchar receivedata[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0x0a};
-
-#else
+#if CONFIG_IO_UART
 	unchar recvData = 0;
 	unchar recvStat; //定义接收状态机
 #endif
@@ -56,7 +52,6 @@ void interrupt ISR(void)
 	//中断处理程序
 	if(UR1RXNE&&UR1RXNEF)			//接收中断
 	{
-		//receivedata[0] =UR1DATAL;
 		uart_receive_input(UR1DATAL);
 	}
 
@@ -66,8 +61,9 @@ void interrupt ISR(void)
 		//UR1DATAL =toSend[i++];
 		//NOP();
 	}
+#endif
 
-#else
+#if 1
     //定时器4的中断处理程序
     if(T4UIE&&T4UIF)			
     {
@@ -104,7 +100,6 @@ void interrupt ISR(void)
     {
        
 	   EPIF0|=0X40;			 				//写1清零6标志位
-	   //DEBUG_IO_PB5 = ~DEBUG_IO_PB5;		//翻转电平
 
 	   if(!UART_RX) //检测引脚高低电平，如果是低电平，则说明检测到下升沿
 	   {
@@ -148,12 +143,9 @@ void interrupt ISR(void)
 	WPDB=0B00000000;
 	WPDC=0B00000000;
 	
-#if CONFIG_HW_UART
-	TRISA=0B10011101;			//输入输出设置，0-输出，1-输入:             PA1 out PA5 out PA6 input
-#else
-	TRISA=0B11011101;			//输入输出设置，0-输出，1-输入: 			PA1 out PA5 out PA6 input
-#endif
-	TRISB=0B11011101;			// PB1 输出    PB5 输出
+	TRISA=0B10111100;			//输入输出设置，0-输出，1-输入:PA0 out             PA1 out PA6 out
+
+	TRISB=0B11011101;			// PB1 输出   PB4输入      PB5 输出
 	TRISC=0B00000011;
 
 	PSRC0=0B11111111;			//源电流设置最大
@@ -228,18 +220,20 @@ void interrupt ISR(void)
 --------------------------------------------------*/
 void UART_INITIAL(void)
 {
-   PCKEN|=0B00100000;		   //使能UART1模块时钟
-   UR1IER=0B00100001;		   //使能发送完成中断，使能接收数据中断
-   UR1LCR=0B00000001;	  	 //8位数据长度，1位停止位，无奇偶校验位
+   PCKEN|=0B00100000;		//使能UART1模块时钟
+   UR1IER=0B00100001;		//使能发送完成中断，使能接收数据中断
+   UR1LCR=0B00000001;	  	//8位数据长度，1位停止位，无奇偶校验位
    UR1MCR=0B00011000;	   	//使能发送和接收接口
 	  
-   UR1DLL=104;					   //波特率=Fmaster/(16*{URxDLH,URxDLL})=9600
+   UR1DLL=104;				//波特率=Fmaster/(16*{URxDLH,URxDLL})=9600
    UR1DLH=0;  
    UR1TCF=1;
    INTCON=0B11000000;
 }
 
-#else
+#endif
+
+#if CONFIG_IO_UART
  /*-------------------------------------------------
  *	函数名：IO_INT_INITIAL
  *	功能：	 IO中断初始化 
@@ -287,7 +281,9 @@ void main(void)
     POWER_INITIAL();		//系统初始化
 #if CONFIG_HW_UART
 	UART_INITIAL();
-#else
+#endif
+
+#if CONFIG_IO_UART
 	IO_INT_INITIAL();
   	TIM4_INITIAL();
   	UART_TX =  1;

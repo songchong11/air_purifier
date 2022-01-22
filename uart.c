@@ -42,7 +42,7 @@
 
 #if CONFIG_HW_UART
 
-void send_a_byte(unchar input)
+void hw_uart_send_a_byte(unchar input)
 {
 	if(UR1TXEF)
 	{
@@ -51,9 +51,10 @@ void send_a_byte(unchar input)
 		DelayUs(104);
 	}
 }
+#endif
 
-#else
-void send_a_byte(unchar input)
+#if CONFIG_IO_UART
+void io_uart_send_a_byte(unchar input)
 {
 		//发送启始位
 		unchar i=8;
@@ -78,8 +79,5 @@ void send_a_byte(unchar input)
 
 }
 #endif
-
-
-
 
 //===========================================================
