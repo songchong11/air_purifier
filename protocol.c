@@ -203,19 +203,19 @@ static unsigned char dp_download_mode_handle(const unsigned char value[], unsign
     unsigned char mode;
     
     mode = mcu_get_dp_download_enum(value,length);
-	printf("user set mode %x by APP\n", mode);
+	printf("user set mode %1x by APP\n", mode);
 
     switch(mode) {
-        case 0:// TODO:添加对应模式0处理函数
+        case 0:// TODO:添加手动模式处理函数
         break;
         
-        case 1:// TODO:添加对应模式1处理函数
+        case 1:// TODO:添加自动模式处理函数
         break;
         
-        case 2:// TODO:添加对应模式2处理函数
+        case 2:// TODO:添加舒适模式处理函数
         break;
         
-        case 3:// TODO:添加对应模式3处理函数
+        case 3:// TODO:添加睡眠模式处理函数
         break;
         
         default:
@@ -245,7 +245,7 @@ static unsigned char dp_download_fan_speed_enum_handle(const unsigned char value
     unsigned char fan_speed_enum;
     
     fan_speed_enum = mcu_get_dp_download_enum(value,length);
-	printf("user set fan_speed_enum to %x by APP\n", fan_speed_enum);
+	printf("user set fan_speed_enum to %1x by APP\n", fan_speed_enum);
     switch(fan_speed_enum) {
         case 0:// TODO:添加空气净化器切换风速函数
         break;
@@ -316,7 +316,7 @@ static unsigned char dp_download_temp_unit_convert_handle(const unsigned char va
     unsigned char temp_unit_convert;
     
     temp_unit_convert = mcu_get_dp_download_enum(value,length);
-	printf("user set temp_unit_convert %x by APP\n", temp_unit_convert);
+	printf("user set temp_unit_convert %1x by APP\n", temp_unit_convert);
     switch(temp_unit_convert) {
         case 0:// TODO:添加空气净化器温标切换函数
         break;

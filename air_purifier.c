@@ -80,8 +80,9 @@ void interrupt ISR(void)
 
 			T4UIE = 0;	//关定时器4 
 
-			EPIF0|=0X40; 			//写1清零6标志位
-			EPIE0=0B01000000;		//开启中断6
+			//EPIF0|=0X40; 			//写1清零6标志位
+			BIT_SET(EPIF0, 4);		//写1清零4标志位
+			EPIE0=0B00010000;		//开启中断4
 			DEBUG_IO_PA1 = 1;//debug
 			return; //并返回
 		}
@@ -99,10 +100,12 @@ void interrupt ISR(void)
     }
 
 
-	if(EPIF0&0X40)
+	//if(EPIF0&0X40)
+	if(BIT_IS_SET(EPIF0, 4))//PB4
     {
        
-	   EPIF0|=0X40;			 				//写1清零6标志位
+	   //EPIF0|=0X40;			 				//写1清零6标志位
+	   BIT_SET(EPIF0, 4);
 
 	   if(!UART_RX) //检测引脚高低电平，如果是低电平，则说明检测到下升沿
 	   {
@@ -239,17 +242,17 @@ void UART_INITIAL(void)
 #if CONFIG_IO_UART
  /*-------------------------------------------------
  *	函数名：IO_INT_INITIAL
- *	功能：	 IO中断初始化 
+ *	功能：	 IO中断初始化 PB4 作为RX
  *	输入：	 无
  *	输出： 	 无
  --------------------------------------------------*/
  void IO_INT_INITIAL(void)
  {
      EPS0=0B00000000;		
-     EPS1=0B00000000;		//选择PA6管脚中断
-     ITYPE0=0B00000000;		//双边沿中断
-     ITYPE1=0B00100000;
-     EPIE0=0B01000000;		//使能中断6
+     EPS1=0B00000001;		//选择PB4管脚中断
+     ITYPE0=0B00000000;		
+     ITYPE1=0B00000010;     //PB4下降沿中断
+     EPIE0=0B00010000;		//使能中断4
      INTCON=0B11000000;		//使能总中断和外设中断
  }
 
@@ -309,13 +312,15 @@ void parse_cmd_from_display_board(void)
 {
 	uchar sum_crc = 0;
 
+	//printf("rx_cnt = %d, %1x %1x %1x\n",rx_cnt, rx_buff[0], rx_buff[1], rx_buff[2]);
+
 	if(rx_cnt == CMD_LEN && rx_buff[0] == UART_CMD_START && rx_buff[1] == 0x52) {
 
-		for (uchar i = 0; i < sizeof(rx_buff); i++)
+		for (uchar i = 0; i < (CMD_LEN - 1); i++)
 			sum_crc += rx_buff[i];
 
 		if (sum_crc != rx_buff[CMD_LEN - 1]) {
-			printf("check crc error!!!\n");
+			printf("check crc error %x !!!\n", sum_crc);
 		} else {
 
 			switch (rx_buff[2]) {
@@ -490,6 +495,7 @@ void main(void)
   	TIM4_INITIAL();
   	UART_TX =  1;
 	recvStat = COM_STOP_BIT;
+	rx_cnt = 0;
  #endif
 
  	
