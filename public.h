@@ -97,11 +97,20 @@ enum{
 	CMD_TYPE_SEND_DATA_TO_WIFI,
 };
 
+
+enum{
+	WIFI_TEST_SUCCESS = 0x10,
+	WIFI_TEST_SUCCESS_BUT_WAKE,
+	WIFI_TEST_FAIL_NOT_SCANED_ROUTE = 0x20,
+	WIFI_TEST_FAIL_NOT_AUTHORIZED,
+};
+
 extern void DelayUs(unsigned char Time);
 extern void hw_uart_send_a_byte(uchar input);
 extern void io_uart_send_a_byte(uchar input);
 extern void send_data_to_display_board(uchar *data);
 extern void DelayMs(unsigned char Time);
+extern void send_back_wifi_test_result(uchar result);
 
 
 

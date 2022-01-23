@@ -348,6 +348,27 @@ void parse_cmd_from_display_board(void)
 }
 
 /*-------------------------------------------------
+ *	函数名：send_back_wifi_test_result
+ *	功能：	将wifi的产测结果返回给显示板 
+ *	输入：	 无
+ *	输出：	 无
+ --------------------------------------------------*/
+void send_back_wifi_test_result(uchar result)
+{
+	uchar cmd_send_tmp[5];
+
+	printf("send_back_wifi_test_result %d \n");
+	cmd_send_tmp[0] = CMD_TYPE_WIFI_TEST_RESULT;
+	cmd_send_tmp[1] = 0x00;
+	cmd_send_tmp[2] = 0x00;
+	cmd_send_tmp[3] = 0x00;
+	cmd_send_tmp[4] = result;
+	send_data_to_display_board(cmd_send_tmp);
+
+
+}
+
+/*-------------------------------------------------
  *	函数名：check_wifi_status
  *	功能：	检查wifi状态，当状态改变时，将状态上报给显示板 
  *	输入：	 无
@@ -355,7 +376,7 @@ void parse_cmd_from_display_board(void)
  --------------------------------------------------*/
 void check_wifi_status(void)
 {
-	static uchar wifi_status_now = 0x10;
+	static uchar wifi_status_now = WIFI_SATE_UNKNOW;
 
 	air_purif.wifi_state = mcu_get_wifi_work_state();
 
@@ -385,7 +406,7 @@ void check_wifi_status(void)
 			break;
 
 			case WIFI_NOT_CONNECTED:
-				//Wi-Fi 配 置 完 成， 正 在 连 接 路 由 器， 即 LED 常 暗
+				//Wi-Fi 配 置 完 成， 正 在 连 接 路 由 器， 即 LED 熄灭
 				printf("wifi not connected\n");
 				cmd_send[0] = CMD_TYPE_WIFI_STATUS;
 				cmd_send[1] = 0x00;
@@ -406,10 +427,43 @@ void check_wifi_status(void)
 				send_data_to_display_board(cmd_send);
 			break;
 
+			case WIFI_CONN_CLOUD:
+				//已连接上路由器且连接到云端，局域网和外网均可控制， 即 LED 常 亮
+				printf("wifi connected\n");
+				cmd_send[0] = CMD_TYPE_WIFI_STATUS;
+				cmd_send[1] = 0x00;
+				cmd_send[2] = 0x00;
+				cmd_send[3] = 0x00;
+				cmd_send[4] = WIFI_CONN_CLOUD;
+				send_data_to_display_board(cmd_send);
+			break;
+
+			case WIFI_LOW_POWER:
+				//wifi设备处于低功耗模式， 即 LED 熄灭
+				printf("wifi connected\n");
+				cmd_send[0] = CMD_TYPE_WIFI_STATUS;
+				cmd_send[1] = 0x00;
+				cmd_send[2] = 0x00;
+				cmd_send[3] = 0x00;
+				cmd_send[4] = WIFI_LOW_POWER;
+				send_data_to_display_board(cmd_send);
+			break;
+
+			case SMART_AND_AP_STATE:
+				//wifi设备处于快连和热点模式共存配置状态， 即 LED 快闪间隔250ms
+				printf("wifi connected\n");
+				cmd_send[0] = CMD_TYPE_WIFI_STATUS;
+				cmd_send[1] = 0x00;
+				cmd_send[2] = 0x00;
+				cmd_send[3] = 0x00;
+				cmd_send[4] = SMART_AND_AP_STATE;
+				send_data_to_display_board(cmd_send);
+			break;
+
 			default:
 			break;
 		}
-
+		memset(cmd_send, 0, sizeof(cmd_send));
 		wifi_status_now == air_purif.wifi_state;
 	}
 

@@ -520,24 +520,29 @@ void mcu_write_rtctime(unsigned char time[])
 void wifi_test_result(unsigned char result,unsigned char rssi)
 {
    // #error "请自行实现wifi功能测试成功/失败代码,完成后请删除该行"
-   // TODO:check
     if(result == 0) {
         //测试失败
         	printf("###########wifi_test fail###########\n");
         if(rssi == 0x00) {
             //未扫描到名称为tuya_mdev_test路由器,请检查
             printf("###########Not scaned a tuya_mdev_test router###########\n");
+			send_back_wifi_test_result(WIFI_TEST_FAIL_NOT_SCANED_ROUTE);
         }else if(rssi == 0x01) {
             //模块未授权
-             printf("###########wifi module not authorized ###########\n");
+            printf("###########wifi module not authorized ###########\n");
+			send_back_wifi_test_result(WIFI_TEST_FAIL_NOT_AUTHORIZED);
         }
     }else {
         //测试成功
         //rssi为信号强度(0-100, 0信号最差，100信号最强)
-        if (rssi >= 50)
+        if (rssi >= 50) {
        		printf("########### wifi module test success ###########\n");
-		else
+			send_back_wifi_test_result(WIFI_TEST_SUCCESS);
+        }
+		else {
 			printf("########### wifi signal weak !!!###########\n");
+			send_back_wifi_test_result(WIFI_TEST_SUCCESS_BUT_WAKE);
+		}
     }
 }
 #endif
