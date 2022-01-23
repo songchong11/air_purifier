@@ -92,7 +92,7 @@ void send_data_to_display_board(uchar *data)
 		tmp_data[7] += tmp_data[i];
 
 	for (i = 0; i < CMD_LEN; i++)
-		io_uart_send_a_byte(tmp_data);
+		io_uart_send_a_byte(tmp_data[i]);
 
 }
 #endif
