@@ -66,7 +66,7 @@ void interrupt ISR(void)
 	}
 #endif
 
-#if 1
+#if CONFIG_IO_UART
     //定时器4的中断处理程序
     if(T4UIE&&T4UIF)			
     {
@@ -464,7 +464,7 @@ void check_wifi_status(void)
 			break;
 		}
 		memset(cmd_send, 0, sizeof(cmd_send));
-		wifi_status_now == air_purif.wifi_state;
+		wifi_status_now = air_purif.wifi_state;
 	}
 
 }

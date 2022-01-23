@@ -26,6 +26,7 @@
 #include "protocol.h"
 #include "system.h"
 #include "mcu_api.h"
+#include "public.h"
 
 
 //=============================================================================

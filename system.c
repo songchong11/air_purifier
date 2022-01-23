@@ -424,11 +424,13 @@ void data_handle(unsigned short offset)
     switch(cmd_type)
     {
         case HEAT_BEAT_CMD:                                     //心跳包
+        	printf("heat_beat_check\n");
             heat_beat_check();
         break;
     
         case PRODUCT_INFO_CMD:                                  //产品信息
-            product_info_update();
+			printf("product_info_update\n");
+			product_info_update();
         break;
     
         case WORK_MODE_CMD:                                     //查询MCU设定的模块工作模式

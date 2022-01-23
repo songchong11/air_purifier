@@ -52,7 +52,7 @@ extern uchar recvData;
 
 #if PRINTF_DEBUG
 #include 	"printf.h"
-#define 	BAUD_1M_DELAY			//baud rat is 1000000
+#define 	BAUD_1M_DELAY			//baud rat is 115200
 #define 	PRINTF_IO				DEBUG_IO_PA0  //PA0 used printf IO
 #endif
 
@@ -101,7 +101,7 @@ enum{
 enum{
 	WIFI_TEST_SUCCESS = 0x10,
 	WIFI_TEST_SUCCESS_BUT_WAKE,
-	WIFI_TEST_FAIL_NOT_SCANED_ROUTE = 0x20,
+	WIFI_TEST_FAIL_NOT_SCANED = 0x20,
 	WIFI_TEST_FAIL_NOT_AUTHORIZED,
 };
 

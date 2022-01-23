@@ -526,7 +526,7 @@ void wifi_test_result(unsigned char result,unsigned char rssi)
         if(rssi == 0x00) {
             //未扫描到名称为tuya_mdev_test路由器,请检查
             printf("###########Not scaned a tuya_mdev_test router###########\n");
-			send_back_wifi_test_result(WIFI_TEST_FAIL_NOT_SCANED_ROUTE);
+			send_back_wifi_test_result(WIFI_TEST_FAIL_NOT_SCANED);
         }else if(rssi == 0x01) {
             //模块未授权
             printf("###########wifi module not authorized ###########\n");
