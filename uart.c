@@ -40,12 +40,9 @@
 
 void hw_uart_send_a_byte(uchar input)
 {
-	if(UR1TXEF)
-	{
-		UR1DATAL = input;
-		DelayMs(1);		// TODO:check
-		DelayUs(104);
-	}
+	while(!UR1TXEF);// TODO:check
+
+	UR1DATAL = input;
 }
 #endif
 
