@@ -21,6 +21,8 @@
 #define		CONFIG_IO_UART		1
 
 #define		UART_CMD_START		0xA5
+#define		WIFI_SEND_CMD_TYPE	0x5B
+
 #define 	CMD_LEN				8
 
 

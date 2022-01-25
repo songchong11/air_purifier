@@ -43,7 +43,7 @@ void hw_uart_send_a_byte(uchar input)
 	if(UR1TXEF)
 	{
 		UR1DATAL = input;
-		DelayMs(1);
+		DelayMs(1);		// TODO:check
 		DelayUs(104);
 	}
 }
@@ -81,15 +81,18 @@ void send_data_to_display_board(uchar *data)
 	uchar tmp_data[8] = {0};
 
 	tmp_data[0] = UART_CMD_START;
-	tmp_data[1] = 0x57;
+	tmp_data[1] = WIFI_SEND_CMD_TYPE;
 	tmp_data[2] = data[0];
 	tmp_data[3] = data[1];
 	tmp_data[4] = data[2];
 	tmp_data[5] = data[3];
 	tmp_data[6] = data[4];
 
+	/*calc CRC*/
 	for (i = 0; i < (CMD_LEN - 1); i++)
 		tmp_data[7] += tmp_data[i];
+
+	tmp_data[7] = ~tmp_data[7] + 1;
 
 	for (i = 0; i < CMD_LEN; i++)
 		io_uart_send_a_byte(tmp_data[i]);

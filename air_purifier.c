@@ -316,8 +316,11 @@ void parse_cmd_from_display_board(void)
 
 	if(rx_cnt == CMD_LEN && rx_buff[0] == UART_CMD_START && rx_buff[1] == 0x52) {
 
+		/*calc CRC*/
 		for (uchar i = 0; i < (CMD_LEN - 1); i++)
 			sum_crc += rx_buff[i];
+
+		sum_crc = ~sum_crc + 1;
 
 		if (sum_crc != rx_buff[CMD_LEN - 1]) {
 			printf("check crc error %x !!!\n", sum_crc);
